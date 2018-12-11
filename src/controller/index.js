@@ -1,10 +1,11 @@
+import Responder from "../../src/lib/expressResponder";
 
 export default class Controller {
   static transferBalance = (req, res) => {
-    res.send({ Message: "Called Transfer balance" });
+    Responder.success(res, "Called transferBalance");
   };
 
   static registerUser = (req, res) => {
-    res.send({ Message: "Called Register User" });
+    Responder.success(res, "Called registerUser");
   };
 }
