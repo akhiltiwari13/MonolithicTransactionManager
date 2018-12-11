@@ -1,4 +1,4 @@
-import convict from 'convict';
+import convict from "convict";
 
 const schema = {
   port: {
