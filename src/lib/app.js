@@ -1,5 +1,6 @@
 import envConfig from "../../config/envConfig";
 import * as express from "./express";
+import * as mongoose from "./mongoose";
 
 const start = () => {
   const port = envConfig.get("port");
@@ -8,8 +9,10 @@ const start = () => {
     console.log(`Server is listening on port: ${port}`);
   };
 
-  const app = express.init();
-  app.listen(port, appStartMessage());
+  mongoose.connect(() => {
+    const app = express.init();
+    app.listen(port, appStartMessage());
+  });
 };
 
 export default start;
