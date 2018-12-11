@@ -1,12 +1,4 @@
-import { runInNewContext } from "vm";
-
-const transferBalance = (req, res) => {
-  res.send({ Message: "Called Transfer balance" });
-};
-
-const registerUser = (req, res) => {
-  res.send({ Message: "Called Register User" });
-};
+import Controller from "../controller";
 
 const _checkAuthentication = (req, res, next) => {
   // TODO: check authentication
@@ -14,8 +6,8 @@ const _checkAuthentication = (req, res, next) => {
 };
 
 const initRoutes = app => {
-  app.post("/transfer", _checkAuthentication, transferBalance);
-  app.post("/registerUser", _checkAuthentication, registerUser);
+  app.post("/transfer", _checkAuthentication, Controller.transferBalance);
+  app.post("/registerUser", _checkAuthentication, Controller.registerUser);
 };
 
 export default initRoutes;
