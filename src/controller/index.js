@@ -1,7 +1,6 @@
 import Responder from "../../src/lib/expressResponder";
 import requestProcessor from "../requestProcessor";
 
-
 export default class Controller {
   static getBalance = (req, res) => {
     const accountName = req.params.userId;
@@ -22,6 +21,9 @@ export default class Controller {
   };
 
   static registerUser = (req, res) => {
-    Responder.success(res, "Called registerUser");
+    return requestProcessor
+      .processCreateAccount(req)
+      .then(result => Responder.success(res, { TranscationId: result }))
+      .catch(error => Responder.operationFailed(res, error));
   };
 }

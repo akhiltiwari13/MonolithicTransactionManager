@@ -14,6 +14,13 @@ const schema = {
     default: "http://192.168.10.81:11011",
     env: "BASE_URL",
     arg: "base_url"
+  },
+  vaultBaseUrl: {
+    doc: "Contains baseUrl of vault",
+    format: String,
+    default: "http://192.168.10.81:8200/v1",
+    env: "VAULT_BASE_URL",
+    arg: "vault_base_url"
   }
 };
 
