@@ -1,7 +1,8 @@
 import getRequest from "../lib/request";
 import _ from "lodash";
+import envConfig from "../../config/envConfig";
 
-const baseUrl = "http://185.208.208.184:5000";
+const baseUrl = envConfig.get("baseUrl");
 
 const processGetBalance = accountName =>
   new Promise((resolve, reject) =>

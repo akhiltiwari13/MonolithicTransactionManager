@@ -1,3 +1,3 @@
-import processGetBalance from "./getBalanceProcessor ";
+import processGetBalance from "./getBalanceProcessor";
 
 export default processGetBalance;
