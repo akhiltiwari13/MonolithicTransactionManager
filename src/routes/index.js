@@ -6,6 +6,7 @@ const _checkAuthentication = (req, res, next) => {
 };
 
 const initRoutes = app => {
+  app.get("/user/:userId/getBalance",  _checkAuthentication, Controller.getBalance)
   app.post("/transfer", _checkAuthentication, Controller.transferBalance);
   app.post("/registerUser", _checkAuthentication, Controller.registerUser);
 };
