@@ -1,6 +1,6 @@
 import request from "request";
 
-const getRequest = (url, body = {}, headers = {}) =>
+export const getRequest = (url, body = {}, headers = {}) =>
   new Promise((resolve, reject) =>
     request.get(
       {
@@ -16,4 +16,19 @@ const getRequest = (url, body = {}, headers = {}) =>
     )
   );
 
-export default getRequest;
+  export const postRequest = (url, body, headers = {"Content-Type": "application/json"}) =>
+  new Promise((resolve, reject) =>
+    request.post(
+      {
+        method: "POST",
+        url,
+        headers,
+        json: body
+      },
+      (error, response,body) => {
+        if (error) reject(error);
+        resolve(body);
+      }
+    )
+  );
+

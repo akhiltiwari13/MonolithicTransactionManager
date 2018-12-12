@@ -1,4 +1,6 @@
-import getRequest from "../lib/request";
+import {getRequest, postRequest} from "../lib/request";
+import prepareBody from "../utility/requestBody"
+
 import _ from "lodash";
 import envConfig from "../../config/envConfig";
 
@@ -16,19 +18,28 @@ const processGetBalance = accountName =>
 
 const _getAccountId = accountName =>
   new Promise((resolve, reject) => {
+    const body = prepareBody([0, "lookup_account_names", [[accountName]]])
     const url = `${baseUrl}/account_id?account_name=${accountName}`;
-    return getRequest(url)
-      .then(resolve)
+    return postRequest(url,body)
+      .then(response => {
+        // const response = _.flatten(res);
+        console.log("lookup_account_names: ",response.result)
+        const accountId = response.result[0].id;
+        resolve(accountId);
+      })
       .catch(reject);
   });
 
 const _getAccountBalance = accountId =>
   new Promise((resolve, reject) => {
-    const url = `${baseUrl}/full_account?account_id=${accountId}`;
-    return getRequest(url)
-      .then(res => {
-        const response = _.flatten(res);
-        const balance = response[1].statistics.core_in_balance / 100000;
+    const body = prepareBody([0, "get_account_balances", [accountId, ["1.3.0"]]]) //hardcoded to get the BTS balance
+    console.log("body:", JSON.stringify(body))
+    const url = `${baseUrl}/rpc`;
+    return postRequest(url,body)
+      .then(response => {
+        // const response = _.flatten(res);
+        console.log(response.result)
+        const balance = response.result[0].amount;
         resolve(balance);
       })
       .catch(reject);

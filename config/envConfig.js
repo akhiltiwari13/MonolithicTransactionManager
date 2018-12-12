@@ -11,7 +11,7 @@ const schema = {
   baseUrl: {
     doc: "Contains baseUrl of third party api",
     format: String,
-    default: "http://185.208.208.184:5000",
+    default: "http://192.168.10.81:11011",
     env: "BASE_URL",
     arg: "base_url"
   }
