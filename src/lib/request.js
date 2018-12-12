@@ -31,4 +31,3 @@ export const getRequest = (url, body = {}, headers = {}) =>
       }
     )
   );
-
