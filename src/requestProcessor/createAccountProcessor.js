@@ -1,4 +1,5 @@
 import request from "request";
+import { postRequest } from "../lib/request";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import envConfig from "../../config/envConfig";
@@ -9,16 +10,11 @@ const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
 const _registerUserToVault = req =>
   new Promise((resolve, reject) => {
-    return request.post(
-      {
-        url: `${vaultBaseUrl}/api/register`,
-        headers: { "x-vault-token": req.headers["x-vault-token"] }
-      },
-      (err, response, body) => {
-        if (err) reject(err);
-        resolve(body);
-      }
-    );
+    const url = `${vaultBaseUrl}/api/register`;
+    const headers = { "x-vault-token": req.headers["x-vault-token"] };
+    return postRequest(url, {}, headers)
+      .then(resolve)
+      .catch(reject);
   });
 
 const _getPublicKey = (req, uuid) =>
@@ -28,17 +24,11 @@ const _getPublicKey = (req, uuid) =>
       path: "",
       uuid
     };
-    return request.post(
-      {
-        url: `${vaultBaseUrl}/api/address`,
-        headers: { "x-vault-token": req.headers["x-vault-token"] },
-        json: body
-      },
-      (err, response, body) => {
-        if (err) reject(err);
-        resolve(body.data.publicKey);
-      }
-    );
+    const url = `${vaultBaseUrl}/api/address`;
+    const headers = { "x-vault-token": req.headers["x-vault-token"] };
+    return postRequest(url, body, headers)
+      .then(res => resolve(res.data.publicKey))
+      .catch(reject);
   });
 
 const processCreateAccount = req =>
@@ -46,7 +36,7 @@ const processCreateAccount = req =>
     let userUuidVault, publicKey, chainId;
     return _registerUserToVault(req)
       .then(result => {
-        userUuidVault = JSON.parse(result).data.uuid;
+        userUuidVault = result.data.uuid;
         return _getPublicKey(req, userUuidVault);
       })
       .then(pubKey => {
