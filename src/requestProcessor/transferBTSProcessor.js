@@ -2,6 +2,8 @@ import { postRequest } from "../lib/request";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import envConfig from "../../config/envConfig";
+import { getConnection } from "typeorm";
+import { Transfer } from "../entity/transfer";
 
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
@@ -61,7 +63,16 @@ const processTransfer = req =>
         return tr.broadcast();
       })
       .then(res => {
-        resolve(res[0].id);
+        const connection = getConnection();
+        const transfer = new Transfer();
+        transfer.tx_id = res[0].id;
+        transfer.from = fromAccount;
+        transfer.to = toAccount;
+        transfer.amount = amount;
+        connection.manager
+          .save(transfer)
+          .then(() => resolve(res[0].id))
+          .catch(reject);
       })
       .catch(reject);
   });

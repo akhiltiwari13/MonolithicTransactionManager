@@ -1,40 +1,14 @@
 import { createConnection } from "typeorm";
 
-export function connect(cb) {
-  console.log("==========================================");
-  return createConnection({
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "qwertyuiop",
-    database: "ankit01",
-    logging: false,
-    synchronize: false,
-    migrationsRun: true,
-    entities: ["./dist/src/entity/**/*.js"],
-    migrations: ["./dist/src/migration/**/*.js"],
-    subscribers: ["./dist/src/subscriber/**/*.js"],
-    cli: {
-      entitiesDir: "./src/entity",
-      migrationsDir: "./src/migration",
-      subscribersDir: "./src/subscriber"
+const connectDB = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const connection = await createConnection();
+      resolve(connection);
+    } catch (err) {
+      reject(err);
     }
-  })
-    .then(res => {
-      console.log(res);
-      return cb();
-    })
-    .catch(err => {
-      console.log('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM');
-      console.log(err);
-      return cb(err)
-    });
-}
+  });
+};
 
-// export const disconnect = cb => {
-//   mongoose.disconnect(err => {
-//     console.log("Disconnected from Postgres.");
-//     cb(err);
-//   });
-// };
+export default connectDB;

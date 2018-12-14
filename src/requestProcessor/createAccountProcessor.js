@@ -2,6 +2,8 @@ import request from "request";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import envConfig from "../../config/envConfig";
+import { getConnection } from "typeorm";
+import { User } from "../entity/user";
 
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
@@ -41,11 +43,11 @@ const _getPublicKey = (req, uuid) =>
 
 const processCreateAccount = req =>
   new Promise((resolve, reject) => {
-    let userUuid, publicKey, chainId;
+    let userUuidVault, publicKey, chainId;
     return _registerUserToVault(req)
       .then(result => {
-        userUuid = JSON.parse(result).data.uuid;
-        return _getPublicKey(req, userUuid);
+        userUuidVault = JSON.parse(result).data.uuid;
+        return _getPublicKey(req, userUuidVault);
       })
       .then(pubKey => {
         let tr = new TransactionBuilder();
@@ -106,7 +108,15 @@ const processCreateAccount = req =>
             return tr.broadcast();
           })
           .then(res => {
-            resolve(res[0].id);
+            const connection = getConnection();
+            const user = new User();
+            user.name = accountName;
+            user.vault_uuid = userUuidVault;
+            user.bts_publickey = publicKey;
+            connection.manager
+              .save(user)
+              .then(() => resolve(res[0].id))
+              .catch(reject);
           })
           .catch(reject);
       })

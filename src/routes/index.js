@@ -1,4 +1,6 @@
 import Controller from "../controller";
+import { getConnection } from "typeorm";
+import { Todo } from "../entity/todo";
 
 const _checkAuthentication = (req, res, next) => {
   // TODO: check authentication
@@ -6,8 +8,16 @@ const _checkAuthentication = (req, res, next) => {
 };
 
 const initRoutes = app => {
-  app.get("/user/:userId/getBalance",  _checkAuthentication, Controller.getBalance)
-  app.get("/user/:userId/getTransactionHistory",  _checkAuthentication, Controller.getTransactionHistory)
+  app.get(
+    "/user/:userId/getBalance",
+    _checkAuthentication,
+    Controller.getBalance
+  );
+  app.get(
+    "/user/:userId/getTransactionHistory",
+    _checkAuthentication,
+    Controller.getTransactionHistory
+  );
   app.post("/transfer", _checkAuthentication, Controller.transferBalance);
   app.post("/registerUser", _checkAuthentication, Controller.registerUser);
 };
