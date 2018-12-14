@@ -1,6 +1,43 @@
 import convict from "convict";
 
 const schema = {
+  db: {
+    host: {
+      doc: "Host for Database",
+      format: String,
+      default: "localhost",
+      env: "DB_HOST",
+      arg: "db_host"
+    },
+    port: {
+      doc: "Port for Database",
+      format: Number,
+      default: 5432,
+      env: "DB_PORT",
+      arg: "db_port"
+    },
+    username: {
+      doc: "Username for Database",
+      format: String,
+      default: 'postgres',
+      env: "DB_USERNAME",
+      arg: "db_username"
+    },
+    password: {
+      doc: "Password for Database",
+      format: String,
+      default: 'qwertyuiop',
+      env: "DB_PASSWORD",
+      arg: "db_password"
+    },
+    database: {
+      doc: "Name of Database",
+      format: String,
+      default: 'testing',
+      env: "DB_DATABASE",
+      arg: "db_database"
+    }
+  },
   port: {
     doc: "The port exposed for server",
     format: Number,

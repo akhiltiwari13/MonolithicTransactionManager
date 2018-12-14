@@ -1,6 +1,4 @@
 import Controller from "../controller";
-import { getConnection } from "typeorm";
-import { Todo } from "../entity/todo";
 
 const _checkAuthentication = (req, res, next) => {
   // TODO: check authentication
