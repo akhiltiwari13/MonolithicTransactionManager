@@ -25,7 +25,11 @@ export function connect(cb) {
       console.log(res);
       return cb();
     })
-    .catch(err => cb(err));
+    .catch(err => {
+      console.log('MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM');
+      console.log(err);
+      return cb(err)
+    });
 }
 
 // export const disconnect = cb => {
