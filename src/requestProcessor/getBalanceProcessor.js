@@ -8,7 +8,7 @@ const baseUrl = envConfig.get("baseUrl");
 
 const processGetBalance = accountName =>
   new Promise((resolve, reject) =>
-    _getAccountId(accountName)
+    _getAccountId(`hwd${accountName}`)
       .then(accountId => _getAccountBalance(accountId))
       .then(balance => {
         balance = balance / 100000;

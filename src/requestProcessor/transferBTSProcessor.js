@@ -4,6 +4,7 @@ import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import envConfig from "../../config/envConfig";
 import { getConnection } from "typeorm";
 import { Transfer } from "../entity/transfer";
+import { User } from "../entity/user";
 
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
@@ -25,8 +26,8 @@ const processTransfer = req =>
       })
       .then(() =>
         Promise.all([
-          FetchChain("getAccount", fromAccount),
-          FetchChain("getAccount", toAccount),
+          FetchChain("getAccount", `hwd${fromAccount}`),
+          FetchChain("getAccount", `hwd${toAccount}`),
           FetchChain("getAsset", sendAmount.asset),
           FetchChain("getAsset", sendAmount.asset)
         ])
@@ -56,7 +57,7 @@ const processTransfer = req =>
           tr.tr_buffer
         ]);
         const trBuff = tr_buff.toString("hex");
-        return _getSignature(trBuff);
+        return _getSignature(trBuff, req.body.fromAccount);
       })
       .then(sign => {
         tr.signatures.push(sign);
@@ -77,16 +78,24 @@ const processTransfer = req =>
       .catch(reject);
   });
 
-const _getSignature = trHex =>
-  new Promise((resolve, reject) => {
+const _getUuid = async (userName) => {
+  const connection = getConnection();
+  const UserRepository = connection.getRepository(User);
+  const senderUuid = await UserRepository.findOne({ name: userName });
+  return senderUuid.vault_uuid;
+}
+
+const _getSignature = (trHex, senderName) =>
+  new Promise(async (resolve, reject) => {
     const txDigest = {
       transactionDigest: trHex
     };
+    const senderUuid = await _getUuid(senderName);
     const body = {
       coinType: 240,
       path: "",
       payload: JSON.stringify(txDigest),
-      uuid: "bg8djldgouhs70pq31r0" // TODO: fetch from database
+      uuid: senderUuid
     };
     const url = `${vaultBaseUrl}/api/signature`;
     const headers = { "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s" };

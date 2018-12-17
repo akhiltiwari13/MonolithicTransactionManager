@@ -1,4 +1,3 @@
-import request from "request";
 import { postRequest } from "../lib/request";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
@@ -41,7 +40,7 @@ const processCreateAccount = req =>
       })
       .then(pubKey => {
         let tr = new TransactionBuilder();
-        let fromAccount = "nathan";
+        let registrarAccount = "nathan";
         let accountName = req.body.name;
         publicKey = pubKey;
         Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL
@@ -49,16 +48,16 @@ const processCreateAccount = req =>
             chainId = res[0].network.chain_id;
             return ChainStore.init();
           })
-          .then(() => Promise.all([FetchChain("getAccount", fromAccount)]))
+          .then(() => Promise.all([FetchChain("getAccount", registrarAccount)]))
           .then(res => {
-            let [fromAccount] = res;
+            let [registrarAccount] = res;
 
             /* Account Create */
             tr.add_type_operation("account_create", {
               referrer_percent: 0,
-              registrar: fromAccount.get("id"),
-              referrer: fromAccount.get("id"),
-              name: accountName,
+              registrar: registrarAccount.get("id"),
+              referrer: registrarAccount.get("id"),
+              name: `hwd${accountName}`,
               owner: {
                 weight_threshold: 1,
                 account_auths: [],
@@ -91,7 +90,7 @@ const processCreateAccount = req =>
               tr.tr_buffer
             ]);
             const trBuff = tr_buff.toString("hex");
-            return _getSignature(trBuff);
+            return _getSignature(trBuff, registrarAccount);
           })
           .then(sign => {
             tr.signatures.push(sign);
@@ -113,28 +112,33 @@ const processCreateAccount = req =>
       .catch(reject);
   });
 
-const _getSignature = trHex =>
-  new Promise((resolve, reject) => {
+const _getUuid = async (registrarAccount) => {
+  const connection = getConnection();
+  const UserRepository = connection.getRepository(User);
+  const registrar = await UserRepository.findOne({ name: registrarAccount });
+  return registrar.vault_uuid;
+}
+
+const _getSignature = (trHex, registrarAccount) =>
+  new Promise(async (resolve, reject) => {
+    const url = `${vaultBaseUrl}/api/signature`;
     const txDigest = {
       transactionDigest: trHex
     };
-    const object = {
+    const registrarUuid = await _getUuid(registrarAccount);
+    const body = {
       coinType: 240,
       path: "",
       payload: JSON.stringify(txDigest),
-      uuid: "bg8djldgouhs70pq31r0" // TODO: fetch from database
+      uuid: registrarUuid
     };
-    return request.post(
-      {
-        url: `${vaultBaseUrl}/api/signature`,
-        headers: { "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s" },
-        json: object
-      },
-      (err, response, body) => {
-        if (err) reject(err);
-        resolve(body.data.signature);
-      }
-    );
+    const headers = {
+      "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
+      "Content-Type": "application/json"
+    };
+    return postRequest(url, body, headers)
+      .then(res => resolve(res.data.signature))
+      .catch(reject);
   });
 
 export default processCreateAccount;
