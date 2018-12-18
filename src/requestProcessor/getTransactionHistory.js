@@ -16,8 +16,9 @@ new Promise((resolve, reject) => {
     })
     .then(() => Promise.all([FetchChain("fetchFullAccount", "1.2.17")]))
     .then(res => {
-      console.log("res: ", res)
-      resolve(res);
+      let [fullAccountHistory] = res;
+      console.log("res: ", fullAccountHistory)
+      resolve(fullAccountHistory.get("history"));
     })
     .catch(reject);
 })
