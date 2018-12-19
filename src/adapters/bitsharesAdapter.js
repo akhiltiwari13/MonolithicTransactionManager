@@ -95,7 +95,7 @@ class BitsharesAdapter {
                 tr.tr_buffer
               ]);
               const trBuff = tr_buff.toString("hex");
-              return this._getSignature(trBuff, registrarAccount);
+              return this._getSignature(trBuff, registrarAccount, true);
             })
             .then(sign => {
               tr.signatures.push(sign);
@@ -166,7 +166,7 @@ class BitsharesAdapter {
             tr.tr_buffer
           ]);
           const trBuff = tr_buff.toString("hex");
-          return this._getSignature(trBuff, req.body.fromAccount);
+          return this._getSignature(trBuff, req.body.fromAccount, false);
         })
         .then(sign => {
           tr.signatures.push(sign);
@@ -217,13 +217,13 @@ class BitsharesAdapter {
     return registrar.vault_uuid;
   }
 
-  _getSignature = (trHex, registrarAccount) =>
+  _getSignature = (trHex, registrarAccount, isRegister) =>
     new Promise(async (resolve, reject) => {
       const url = `${vaultBaseUrl}/api/signature`;
       const txDigest = {
         transactionDigest: trHex
       };
-      const registrarUuid = await this._getUuid(registrarAccount);
+      const registrarUuid = isRegister ? 'bgd3f7lgouhs7rjiapd0' : await this._getUuid(registrarAccount);
       const body = {
         coinType: 240,
         path: "",
