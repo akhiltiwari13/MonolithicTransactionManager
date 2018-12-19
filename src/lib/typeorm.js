@@ -6,6 +6,8 @@ const connectDB = () => {
       const connection = await createConnection();
       resolve(connection);
     } catch (err) {
+      logger.error('Could not connect to TypeORM!');
+      logger.error(err);
       reject(err);
     }
   });
