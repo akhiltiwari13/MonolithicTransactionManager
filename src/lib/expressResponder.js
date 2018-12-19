@@ -1,18 +1,17 @@
-import _ from 'lodash';
+import logger from './logger'
+import _ from 'lodash'
 
-const Responder = () => {}
+const Responder = () => { }
 
 /*
  * This method sends the response to the client.
  */
 const sendResponse = (res, status, body) => {
-  if(!res.headersSent) {
-    if(body)
-      return res.status(status).json(body);
-    return res.status(status).send();
-  }
-  else {
-    console.log('Response already sent.');
+  if (!res.headersSent) {
+    if (body) { return res.status(status).json(body) }
+    return res.status(status).send()
+  } else {
+    logger.error('Response already sent.')
   }
 }
 
@@ -21,26 +20,33 @@ const sendResponse = (res, status, body) => {
  * what is the result of the incomming request
  */
 Responder.success = (res, message) => {
-  message = _.isString(message) ? { message } : message;
-  return sendResponse(res, 200, message);
+  message = _.isString(message) ? { message } : message
+  return sendResponse(res, 200, { result: message })
 }
 
 Responder.created = (res, object) => {
-  return sendResponse(res, 201, object);
+  return sendResponse(res, 201, object)
 }
 
 Responder.deleted = (res) => {
-  return sendResponse(res, 204);
+  return sendResponse(res, 204)
 }
 
 Responder.operationFailed = (res, reason) => {
-  const status = reason.status;
-  if (reason.message !== 'subscriber_id is invalid') {
-    console.log(`{ time: ${new Date()}, responseSent: ${reason.message} }`);
-    console.log(reason);
+  const status = reason.status || 400
+  if (reason.name === 'SequelizeUniqueConstraintError') {
+    reason = reason.errors.map((er) => {
+      let errors = {}
+      errors[er.path] = er.message
+      return errors
+    })
+  } else {
+    reason = reason.message || reason
   }
-  reason = reason.message || reason;
-  return sendResponse(res, status || 400, {reason});
+  delete reason.status
+  let errors = [reason]
+  if (reason instanceof Object) errors = _.flatten(_.flatMap(reason).map((object) => { return _.flatMap(object) }))
+  return sendResponse(res, status, { reason, errors })
 }
 
-export default Responder;
+export default Responder

@@ -38,6 +38,26 @@ const schema = {
       arg: "db_database"
     }
   },
+  app: {
+    name: {
+      doc: 'Howdoo Blockchain Service',
+      format: String,
+      default: 'Howdoo Blockchain Service'
+    }
+  },
+  env: {
+    doc: 'The application environment.',
+    format: ['production', 'development', 'staging', 'test'],
+    default: 'development',
+    env: 'NODE_ENV',
+    arg: "node_env"
+  },
+  log_level: {
+    doc: 'level of logs to show',
+    format: String,
+    default: 'debug',
+    env: 'LOG_LEVEL'
+  },
   port: {
     doc: "The port exposed for server",
     format: Number,
@@ -46,7 +66,7 @@ const schema = {
     arg: "port"
   },
   baseUrl: {
-    doc: "Contains baseUrl of third party api",
+    doc: "Contains baseUrl for BTS third party api",
     format: String,
     default: "http://192.168.10.81:11011",
     env: "BASE_URL",

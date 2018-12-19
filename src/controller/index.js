@@ -1,34 +1,5 @@
-import Responder from "../../src/lib/expressResponder";
-import requestProcessor from "../requestProcessor";
+import UserController from './userController';
+import TransferController from './transferController';
+import HealthController from './healthController';
 
-export default class Controller {
-  static getBalance = (req, res) => {
-    const accountName = req.params.userId;
-    return requestProcessor
-      .processGetBalance(accountName)
-      .then(balanceObject => Responder.success(res, balanceObject))
-      .catch(error => Responder.operationFailed(res, error));
-  };
-
-  static getTransactionHistory = (req, res) => {
-    const accountName = req.params.userId;
-    return requestProcessor
-      .processGetTransactionHistory(accountName)
-      .then(balanceObject => Responder.success(res, balanceObject))
-      .catch(error => Responder.operationFailed(res, error));
-  };
-
-  static transferBalance = (req, res) => {
-    return requestProcessor
-      .processTransfer(req)
-      .then(result => Responder.success(res, { TranscationId: result }))
-      .catch(error => Responder.operationFailed(res, error));
-  };
-
-  static registerUser = (req, res) => {
-    return requestProcessor
-      .processCreateAccount(req)
-      .then(result => Responder.success(res, { TranscationId: result }))
-      .catch(error => Responder.operationFailed(res, error));
-  };
-}
+export { UserController, TransferController, HealthController };
