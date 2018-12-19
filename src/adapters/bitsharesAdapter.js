@@ -7,7 +7,7 @@ import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 
-const baseUrl = envConfig.get("baseUrl");
+const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
 class BitsharesAdapter {
@@ -244,7 +244,7 @@ class BitsharesAdapter {
   _getAccountId = accountName =>
     new Promise((resolve, reject) => {
       const body = prepareBody([0, "lookup_account_names", [[accountName]]]);
-      const url = `${baseUrl}/account_id?account_name=${accountName}`;
+      const url = `${BTSBaseUrl}/account_id?account_name=${accountName}`;
       return postRequest(url, body)
         .then(response => {
           const accountId = response.result[0].id;
@@ -260,7 +260,7 @@ class BitsharesAdapter {
         "get_account_balances",
         [accountId, ["1.3.0"]]
       ]); //hardcoded to get the BTS balance
-      const url = `${baseUrl}/rpc`;
+      const url = `${BTSBaseUrl}/rpc`;
       return postRequest(url, body)
         .then(response => {
           const balance = response.result[0].amount;
