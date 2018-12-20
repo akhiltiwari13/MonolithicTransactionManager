@@ -204,7 +204,7 @@ class BitcoinAdapater {
       return getRequest(url)
         .then(resolve)
         .catch(reject)
-    })
+    });
 
   _estimateFee = () =>
     new Promise((resolve, reject) => {
