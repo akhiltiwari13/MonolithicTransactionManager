@@ -33,7 +33,11 @@ class BitcoinAdapater {
         .catch(reject)
     });
 
+<<<<<<< 655a1426d7fc186a55224c353f1397291d5676d4
   registerUser = req =>
+=======
+  createAccount = req =>
+>>>>>>> Adds: BTC user to vault
     new Promise((resolve, reject) => this._registerUserToVault(req)
       .then(result => {
         const connection = getConnection();
@@ -45,6 +49,7 @@ class BitcoinAdapater {
       .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
       .catch(reject))
 
+<<<<<<< 655a1426d7fc186a55224c353f1397291d5676d4
   transfer = req =>
     new Promise((resolve, reject) => {
       let estimateFee, balance;
@@ -182,6 +187,8 @@ class BitcoinAdapater {
         .catch(reject)
     })
 
+=======
+>>>>>>> Adds: BTC user to vault
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
@@ -191,6 +198,7 @@ class BitcoinAdapater {
         .catch(reject);
     });
 
+<<<<<<< 655a1426d7fc186a55224c353f1397291d5676d4
   _getPublicAddress = (req, senderName) =>
     new Promise(async (resolve, reject) => {
       const senderUuid = await this._getUuid(senderName);
@@ -206,6 +214,21 @@ class BitcoinAdapater {
         .then(res => resolve(res.data))
         .catch(reject);
     });
+=======
+  // _getPublicKey = (req, uuid, coinId) =>
+  //   new Promise((resolve, reject) => {
+  //     const body = {
+  //       coinType: coinId,
+  //       path: `m/44'/${coinId}'/0'/0/0`,
+  //       uuid
+  //     };
+  //     const url = `${vaultBaseUrl}/api/address`;
+  //     const headers = { "x-vault-token": req.headers["x-vault-token"] };
+  //     return postRequest(url, body, headers)
+  //       .then(res => resolve(res.data))
+  //       .catch(reject);
+  //   });
+>>>>>>> Adds: BTC user to vault
 }
 
 export default BitcoinAdapater;
