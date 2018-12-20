@@ -13,14 +13,14 @@ export default class UserController {
     const accountName = req.params.userId;
     return req.adapter
       .getTransactionHistory(accountName)
-      .then(balanceObject => Responder.success(res, balanceObject))
+      .then(txnObject => Responder.success(res, txnObject))
       .catch(error => Responder.operationFailed(res, error));
   };
 
   static registerUser = (req, res) => {
     return req.adapter
       .createAccount(req)
-      .then(result => Responder.success(res, { TranscationId: result }))
+      .then(result => Responder.success(res, result))
       .catch(error => Responder.operationFailed(res, error));
   };
 }
