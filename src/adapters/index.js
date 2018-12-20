@@ -15,4 +15,4 @@ export const getBlockchain = (blockchain) => {
   }
 }
 
-export { BitsharesAdapter };
+export { BitsharesAdapter, EthereumAdapter };
