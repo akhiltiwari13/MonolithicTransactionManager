@@ -33,7 +33,7 @@ class BitcoinAdapater {
         .catch(reject)
     });
 
-  createAccount = req =>
+  registerUser = req =>
     new Promise((resolve, reject) => this._registerUserToVault(req)
       .then(result => {
         const connection = getConnection();

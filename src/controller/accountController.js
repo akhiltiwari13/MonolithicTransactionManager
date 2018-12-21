@@ -17,7 +17,7 @@ export default class AccountController {
   static createAccount = (req, res) =>{
     req.adapter = Adapters.getBlockchain('BTS');
     return req.adapter
-      .createAccount(req)
+      .registerUser(req)
       .then(result => Responder.success(res, result))
       .catch(error => Responder.operationFailed(res, error));
   }
