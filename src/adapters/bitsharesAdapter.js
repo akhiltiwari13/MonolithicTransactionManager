@@ -53,7 +53,7 @@ class BitsharesAdapter {
         .catch(reject)
     });
 
-  createAccount = req =>
+  registerUser = req =>
     new Promise((resolve, reject) => {
       if (!req.body.name) {
         return reject(new ParameterInvalidError('Account name is required'));

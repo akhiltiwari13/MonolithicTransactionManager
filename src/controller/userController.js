@@ -19,7 +19,7 @@ export default class UserController {
 
   static registerUser = (req, res) => {
     return req.adapter
-      .createAccount(req)
+      .registerUser(req)
       .then(result => Responder.success(res, result))
       .catch(error => Responder.operationFailed(res, error));
   };
