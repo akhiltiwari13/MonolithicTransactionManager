@@ -17,28 +17,13 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getStatus = (blockchain, txnId) =>
-    new Promise(async (resolve, reject) => {
-      const connection = getConnection();
-      const TransferRepository = connection.getRepository(Transfer);
-      const transaction = await TransferRepository.findOne({ txn_id: txnId, coin_id: blockchain });
-      if (!transaction) {
-        return reject(new BadRequestError('Transaction does not exists'));
-      }
-      return resolve(transaction.txn_status);
-    })
-
-  getBalance = (headers, accountName) =>
-    new Promise(async (resolve, reject) => {
-      const isAccountExists = await this._getUuid(accountName);
-      if (!isAccountExists) {
-        return reject(new BadRequestError('Account does not exists'));
-      }
-      return this._getAccountId(`hwd${accountName}`)
+  getBalance = (headers , accountName) => // headers required for other adapters.
+    new Promise((resolve, reject) =>
+      this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
         .catch(reject)
-    })
+    )
 
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
