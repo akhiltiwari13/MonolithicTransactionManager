@@ -4,7 +4,7 @@ export default class UserController {
   static getBalance = (req, res) => {
     const accountName = req.params.userId;
     return req.adapter
-      .getBalance(accountName)
+      .getBalance(req.headers, accountName)
       .then(balanceObject => Responder.success(res, balanceObject))
       .catch(error => Responder.operationFailed(res, error));
   };

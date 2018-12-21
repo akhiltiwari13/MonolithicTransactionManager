@@ -15,7 +15,7 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getBalance = accountName =>
+  getBalance = (headers , accountName) => // headers required for other adapters.
     new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
