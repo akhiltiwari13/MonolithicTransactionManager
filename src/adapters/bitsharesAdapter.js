@@ -35,7 +35,7 @@ class BitsharesAdapter {
         .catch(reject);
     });
 
-  createAccount = req =>
+  registerUser = req =>
     new Promise((resolve, reject) => {
       let userUuidVault, publicKey, chainId;
       return this._registerUserToVault(req)
