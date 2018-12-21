@@ -16,20 +16,12 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getStatus = async (txnId) => {
-    const connection = getConnection();
-    const TransferRepository = connection.getRepository(Transfer);
-    const transaction = await TransferRepository.findOne({ txn_id: txnId });
-    return transaction.txn_status;
-  }
-
-  getBalance = (headers, accountName) =>
-    new Promise((resolve, reject) => {
+  getBalance = (headers , accountName) => // headers required for other adapters.
+    new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
-        .catch(reject)
-    })
+        .catch(reject))
 
   getTransactionHistory = (headers, accountName) =>
     new Promise((resolve, reject) => {
