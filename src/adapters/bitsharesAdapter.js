@@ -22,7 +22,8 @@ class BitsharesAdapter {
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
-        .catch(reject))
+        .catch(reject)
+    )
 
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
