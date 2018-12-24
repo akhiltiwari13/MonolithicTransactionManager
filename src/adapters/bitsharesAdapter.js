@@ -241,6 +241,15 @@ class BitsharesAdapter {
         .catch(reject);
     });
 
+  getPrice = (query) =>
+    new Promise((resolve, reject) => {
+      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${query.currency}`;
+      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      return getRequest(url, {}, headers)
+        .then(result => resolve({ coin: 'UDOO', [query.currency]: result[query.currency] }))
+        .catch(reject);
+    });
+
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
