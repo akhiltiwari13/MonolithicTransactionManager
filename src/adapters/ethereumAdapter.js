@@ -3,7 +3,6 @@ import envConfig from "../../config/envConfig";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 
-
 /* required constants for ethereum adapter */
 // const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
@@ -96,6 +95,9 @@ class EthereumAdapter {
         const registrar = await UserRepository.findOne({ name: account });
         return registrar.vault_uuid;
     }
+
+
+    // TO BE WORKED ON.....
 
     _getGas = async (data, from, to) => {
         const gas = await web3.eth.estimateGas({ data, from, to });
