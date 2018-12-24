@@ -1,19 +1,13 @@
 import { postRequest } from "../lib/request";
-import prepareBody from "../utils/requestBody";
 import envConfig from "../../config/envConfig";
-import { Apis } from "bitsharesjs-ws"; // remove this eventually
-import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs"; // remove this eventually
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 
-// import { Tx } from "ethereumjs-tx"
-import { Transfer } from "../entity/transfer";
 
 /* required constants for ethereum adapter */
 // const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
 
-const BTSBaseUrl = envConfig.get("btsBaseUrl");  //what should be ETHBase URL?
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
 
@@ -102,9 +96,6 @@ class EthereumAdapter {
         const registrar = await UserRepository.findOne({ name: account });
         return registrar.vault_uuid;
     }
-
-
-    // TO BE WORKED ON.....
 
     _getGas = async (data, from, to) => {
         const gas = await web3.eth.estimateGas({ data, from, to });
@@ -199,6 +190,9 @@ class EthereumAdapter {
         });
 
 
+
+
+    // TO BE WORKED ON.....
     getTransactionHistory = accountName =>
         new Promise(async (resolve, reject) => {
             const uuid = await this._getUuid(accountName);
@@ -212,22 +206,6 @@ class EthereumAdapter {
                 })
                 .catch(reject)
         })
-
-    _getPublicKey = (req, uuid) =>
-        new Promise((resolve, reject) => {
-            const body = {
-                coinType: 60,
-                path: "m/44'/60'/0'/0/0",
-                uuid: uuid
-            };
-            const url = `${vaultBaseUrl}/api/address`;
-            const vaultHeaders = { "x-vault-token": headers["x-vault-token"] };
-            return postRequest(url, body, vaultHeaders)
-                .then(res => {
-                    return resolve(res.data.address);
-                })
-                .catch(reject);
-        });
 
 }
 
