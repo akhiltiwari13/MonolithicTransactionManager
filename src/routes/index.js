@@ -1,4 +1,4 @@
-import { UserController, TransferController, HealthController } from "../controller";
+import { UserController, TransferController, HealthController, CoinController } from "../controller";
 import * as Adapters from '../adapters';
 
 const _checkAuthentication = (req, res, next) => {
@@ -13,8 +13,9 @@ const _getBlockChain = (req, res, next) => {
 
 const initRoutes = app => {
   app.get('/healthCheck', _checkAuthentication, HealthController.getStatus);
-  app.get("/user/:userId/getBalance", _checkAuthentication, _getBlockChain, UserController.getBalance);
-  app.get("/user/:userId/getTransactionHistory", _checkAuthentication, _getBlockChain, UserController.getTransactionHistory);
+  app.get('/coin/:coinId/price', _checkAuthentication, _getBlockChain, CoinController.getPrice);
+  app.get("/user/:userId/balance", _checkAuthentication, _getBlockChain, UserController.getBalance);
+  app.get("/user/:userId/transactionHistory", _checkAuthentication, _getBlockChain, UserController.getTransactionHistory);
   app.post("/transfer", _checkAuthentication, _getBlockChain, TransferController.transferBalance);
   app.post("/registerUser", _checkAuthentication, _getBlockChain, UserController.registerUser);
 };
