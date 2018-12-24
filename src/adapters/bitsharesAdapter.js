@@ -1,4 +1,4 @@
-import { postRequest } from "../lib/request";
+import { postRequest, getRequest } from "../lib/request";
 import prepareBody from "../utils/requestBody";
 import envConfig from "../../config/envConfig";
 import { Apis } from "bitsharesjs-ws";
@@ -8,6 +8,7 @@ import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
+const priceBaseUrl = envConfig.get("priceBaseUrl");
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
 class BitsharesAdapter {
@@ -184,6 +185,15 @@ class BitsharesAdapter {
             .then(() => resolve(res[0].id))
             .catch(reject);
         })
+        .catch(reject);
+    });
+
+  getPrice = (query) =>
+    new Promise((resolve, reject) => {
+      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${query.currency}`;
+      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      return getRequest(url, {}, headers)
+        .then(result => resolve({ coin: 'UDOO', [query.currency]: result[query.currency] }))
         .catch(reject);
     });
 
