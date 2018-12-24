@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({ name: "transfers" })
+@Entity({ name: "transactions" })
 export class Transfer {
   @PrimaryGeneratedColumn("varchar", { unique: true })
-  tx_id = "testTxId";
+  txn_id = "testTxId";
 
   @Column("varchar")
   from = "testFromName";
@@ -13,4 +13,10 @@ export class Transfer {
 
   @Column("varchar")
   amount = "testAmount";
+
+  @Column("varchar")
+  coin_id = "testAmount";
+
+  @Column("varchar")
+  txn_status = "testAmount";
 }
