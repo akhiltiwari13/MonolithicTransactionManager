@@ -93,6 +93,13 @@ const schema = {
     env: "PRICE_BASE_URL",
     arg: "price_base_url"
   },
+  priceBaseUrl: {
+    doc: "Contains baseUrl to get price from third party api",
+    format: String,
+    default: "https://min-api.cryptocompare.com",
+    env: "PRICE_BASE_URL",
+    arg: "price_base_url"
+  },
   vaultBaseUrl: {
     doc: "Contains baseUrl of vault",
     format: String,
