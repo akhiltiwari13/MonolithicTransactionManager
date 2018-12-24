@@ -8,6 +8,7 @@ import { TransactionBuilder, networks } from 'bitcoinjs-lib';
 import _ from 'lodash';
 
 const btcEnvironment = envConfig.get('env');
+const priceBaseUrl = envConfig.get("priceBaseUrl");
 const btcBaseUrl = btcEnvironment === 'development' ? envConfig.get('btcTestBaseUrl') : envConfig.get('btcMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
@@ -69,6 +70,15 @@ class BitcoinAdapater {
         .then(res => resolve(res.txid))
         .catch(reject)
     })
+
+  getPrice = (query) =>
+    new Promise((resolve, reject) => {
+      const url = `${priceBaseUrl}/data/price?fsym=BTC&tsyms=${query.currency}`;
+      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      return getRequest(url, {}, headers)
+        .then(result => resolve({ coin: 'BTC', [query.currency]: result[query.currency] }))
+        .catch(reject);
+    });
 
   _makeRawTransaction = async (senderAddress, balance, utxos, receiverAddress, estimateFee, sendAmount) => {
     const blockchainNetworkBitcoinjsLib = envConfig.get('env') === 'production' ? networks.bitcoin : networks.testnet
