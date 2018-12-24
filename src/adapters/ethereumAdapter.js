@@ -9,6 +9,10 @@ import { User } from "../entity/user";
 // import { Tx } from "ethereumjs-tx"
 import { Transfer } from "../entity/transfer";
 
+/* required constants for ethereum adapter */
+// const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
+// this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
+
 const BTSBaseUrl = envConfig.get("btsBaseUrl");  //what should be ETHBase URL?
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
@@ -102,92 +106,94 @@ class EthereumAdapter {
 
     // TO BE WORKED ON.....
 
-    transfer = req =>
-        new Promise((resolve, reject) => {
-            let chainId;
-            const fromAccount = req.body.fromAccount;
-            const toAccount = req.body.toAccount;
-            // const amount = req.body.sendAmount * 100000;
-            const amount = req.body.sendAmount
-            const sendAmount = {
-                amount,
-                asset: "BTS"
-            };
-            let tr = new TransactionBuilder();
+    _getGas = async (data, from, to) => {
+        const gas = await web3.eth.estimateGas({ data, from, to });
+        return gas;
+    }
 
-            // what will be the value for nounce, value, gasLimit, gasPrice and chain id? is it hardcoded?
+    _getGasPrice = async () => {
+        const gasPrice = await (web3.eth.gasPrice * 1.5);
+        return gasPrice;
+    }
+
+    _getNounce = async (fromAccount) => {
+        // console.log("inside _getNounce")
+        const nounce = await web3.eth.getTransactionCount(fromAccount);
+        return nounce;
+    }
+
+    _getWeiFromEth = async (amount) => {
+        return web3.toWei(amount, 'ether');
+    }
+
+    transfer = req =>
+        new Promise(async (resolve, reject) => {
+            // console.log("@@@ transfer BEGIN @@@");
+            const fromAccountUUID = await this._getUuid(req.body.fromAccount); // console.log("fromAccountUUID:", fromAccountUUID);
+            const toAccountUUID = await this._getUuid(req.body.toAccount); // console.log("toAccountUUID:", toAccountUUID);
+            const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID); // console.log("fromAccountAddress: ", fromAccountAddress);
+            const toAccountAddress = await this._getAddress(req.headers, toAccountUUID); // console.log("toAccountAddress: ", toAccountAddress);
+            const gasPrice = await this._getGasPrice(); // console.log("gasPrice:", gasPrice);
+            const gasLimit = await this._getGas("", fromAccountAddress, toAccountAddress); // console.log("gasLimit:", gasLimit);
+            const amount = await this._getWeiFromEth(req.body.sendAmount); //console.log("amount:", amount); //converting to wei
+            const nounce = await this._getNounce(fromAccountAddress); //console.log("nounce:", nounce);
+
+            // what will be the value for gasLimit and chain id? is it hardcoded?
             const payload = {
-                nonce: 0,
-                value: amount,
-                gasLimit: 21000,
-                gasPrice: 5,
-                to: toAccount,
-                data: "",
-                chainId: 1
+                nonce: nounce,
+                value: Number(amount),
+                gasLimit: gasLimit,
+                gasPrice: gasPrice,
+                to: toAccountAddress,
+                data: "", // what will this take?
+                chainId: 1 // 1 for mainnet and 3 for testnet
             }
+            // const payload= {
+            //     "nonce":0,
+            //     "value":10000000000000000000,
+            //     "gasLimit":21000,
+            //     "gasPrice":1500000000,
+            //     "to":"0xD60183AF455b08afE7E0B6A77D58411Fe59ee17D",
+            //     "data":"",
+            //     "chainId":1
+            //   };
+            // console.log("PAYLOAD: ", payload);
+
+            // console.log("data: ", data);
+
+            // ==>SIGN THE TRANSACTION FROM THE VAULT<==
+            return this._signTransaction(payload, fromAccountUUID)
+                .then(signedTransaction => {
+                    console.log("signedTransaction: ", signedTransaction)
+                    const transactionHash = web3.eth.sendRawTransaction(signedTransaction.signature);
+                    return resolve(true);
+                })
+                .catch(reject);
+        });
+
+
+    _signTransaction = (payload, fromAccountUUID) => //LOG HERE....
+        new Promise(async (resolve, reject) => {
+            const url = `${vaultBaseUrl}/api/signature`;
+            // console.log("JSON.stringify(payload): ", JSON.stringify(payload));
 
             // to be sent to 
-            const data = {
-                "uuid": uuid,
-                "path": "m/44'/60'/0'/0/0",
+            const body = {
                 "coinType": 60,
-                "payload": JSON.stringify(payload)
+                "path": "m/44'/60'/0'/0/0",
+                "payload": JSON.stringify(payload),
+                "uuid": fromAccountUUID
             }
-            Apis.instance("ws://192.168.10.81:11011", true)
-                .init_promise.then(res => {
-                    chainId = res[0].network.chain_id;
-                    return ChainStore.init();
-                })
-                .then(() =>
-                    Promise.all([
-                        FetchChain("getAccount", `hwd${fromAccount}`),
-                        FetchChain("getAccount", `hwd${toAccount}`),
-                        FetchChain("getAsset", sendAmount.asset),
-                        FetchChain("getAsset", sendAmount.asset)
-                    ])
-                )
+            console.log("body: ", body);
+            // needs to be passed as parameters instead...
+            const headers = {
+                "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
+                "Content-Type": "application/json"
+            };
+            return postRequest(url, body, headers)
                 .then(res => {
-                    let [fromAccount, toAccount, sendAsset, feeAsset] = res;
-
-                    tr.add_type_operation("transfer", {
-                        fee: {
-                            amount: 0,
-                            asset_id: feeAsset.get("id")
-                        },
-                        from: fromAccount.get("id"),
-                        to: toAccount.get("id"),
-                        amount: {
-                            amount: sendAmount.amount,
-                            asset_id: sendAsset.get("id")
-                        }
-                    });
-
-                    return tr.set_required_fees();
-                })
-                .then(() => tr.finalize())
-                .then(() => {
-                    const tr_buff = Buffer.concat([
-                        new Buffer(chainId, "hex"),
-                        tr.tr_buffer
-                    ]);
-                    const trBuff = tr_buff.toString("hex");
-                    return this._getSignature(trBuff, req.body.fromAccount, false);
-                })
-                .then(sign => {
-                    tr.signatures.push(sign);
-                    return tr.broadcast();
-                })
-                .then(res => {
-                    const connection = getConnection();
-                    const transfer = new Transfer();
-                    transfer.tx_id = res[0].id;
-                    transfer.from = fromAccount;
-                    transfer.to = toAccount;
-                    transfer.amount = amount;
-                    connection.manager
-                        .save(transfer)
-                        .then(() => resolve(res[0].id))
-                        .catch(reject);
+                    console.log("res:", res);
+                    return resolve(res.data);
                 })
                 .catch(reject);
         });
@@ -207,7 +213,6 @@ class EthereumAdapter {
                 .catch(reject)
         })
 
-
     _getPublicKey = (req, uuid) =>
         new Promise((resolve, reject) => {
             const body = {
@@ -221,32 +226,6 @@ class EthereumAdapter {
                 .then(res => resolve(res.data.publicKey))
                 .catch(reject);
         });
-
-
-
-    _getSignature = (trHex, registrarAccount, isRegister) => { }
-    // new Promise(async (resolve, reject) => {
-    //     const url = `${vaultBaseUrl}/api/signature`;
-    //     const txDigest = {
-    //         transactionDigest: trHex
-    //     };
-    //     const registrarUuid = isRegister ? 'bgd3f7lgouhs7rjiapd0' : await this._getUuid(registrarAccount);
-    //     const body = {
-    //         coinType: 240,
-    //         path: "",
-    //         payload: JSON.stringify(txDigest),
-    //         uuid: registrarUuid
-    //     };
-    //     const headers = {
-    //         "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
-    //         "Content-Type": "application/json"
-    //     };
-    //     return postRequest(url, body, headers)
-    //         .then(res => {
-    //             return resolve(res.data.signature);
-    //         })
-    //         .catch(reject);
-    // });
 
 }
 
