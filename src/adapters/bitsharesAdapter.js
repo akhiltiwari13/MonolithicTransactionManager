@@ -96,7 +96,7 @@ class BitsharesAdapter {
                 tr.tr_buffer
               ]);
               const trBuff = tr_buff.toString("hex");
-              return this._getSignature(trBuff, registrarAccount, true);
+              return this._getSignature(req, trBuff, registrarAccount);
             })
             .then(sign => {
               tr.signatures.push(sign);
@@ -107,7 +107,6 @@ class BitsharesAdapter {
               const user = new User();
               user.name = accountName;
               user.vault_uuid = userUuidVault;
-              user.bts_publickey = publicKey;
               connection.manager
                 .save(user)
                 .then(() => resolve(res[0].id))
@@ -136,7 +135,7 @@ class BitsharesAdapter {
         })
         .then(() =>
           Promise.all([
-            FetchChain("getAccount", `hwd${fromAccount}`),
+            FetchChain("getAccount", fromAccount === 'nathan' ? 'nathan' : `hwd${fromAccount}`),
             FetchChain("getAccount", `hwd${toAccount}`),
             FetchChain("getAsset", sendAmount.asset),
             FetchChain("getAsset", sendAmount.asset)
@@ -167,7 +166,7 @@ class BitsharesAdapter {
             tr.tr_buffer
           ]);
           const trBuff = tr_buff.toString("hex");
-          return this._getSignature(trBuff, req.body.fromAccount, false);
+          return this._getSignature(req, trBuff, req.body.fromAccount);
         })
         .then(sign => {
           tr.signatures.push(sign);
@@ -176,10 +175,12 @@ class BitsharesAdapter {
         .then(res => {
           const connection = getConnection();
           const transfer = new Transfer();
-          transfer.tx_id = res[0].id;
+          transfer.txn_id = res[0].id;
           transfer.from = fromAccount;
           transfer.to = toAccount;
           transfer.amount = amount;
+          transfer.coin_id = 'BTS';
+          transfer.txn_status = 'CONFIRMED';
           connection.manager
             .save(transfer)
             .then(() => resolve(res[0].id))
@@ -220,20 +221,20 @@ class BitsharesAdapter {
         .catch(reject);
     });
 
-  _getUuid = async (registrarAccount) => {
+  _getUuid = async (accountName) => {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
-    const registrar = await UserRepository.findOne({ name: registrarAccount });
+    const registrar = await UserRepository.findOne({ name: accountName });
     return registrar.vault_uuid;
   }
 
-  _getSignature = (trHex, registrarAccount, isRegister) =>
+  _getSignature = (req, trHex, registrarAccount) =>
     new Promise(async (resolve, reject) => {
       const url = `${vaultBaseUrl}/api/signature`;
       const txDigest = {
         transactionDigest: trHex
       };
-      const registrarUuid = isRegister ? 'bgd3f7lgouhs7rjiapd0' : await this._getUuid(registrarAccount);
+      const registrarUuid = registrarAccount === 'nathan' ? 'bggc15lgouhsbaup1d3g' : await this._getUuid(registrarAccount);
       const body = {
         coinType: 240,
         path: "",
@@ -241,13 +242,11 @@ class BitsharesAdapter {
         uuid: registrarUuid
       };
       const headers = {
-        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
+        "x-vault-token": req.headers["x-vault-token"],
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)
-        .then(res => {
-          return resolve(res.data.signature);
-        })
+        .then(res => resolve(res.data.signature))
         .catch(reject);
     });
 

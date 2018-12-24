@@ -6,8 +6,5 @@ export class User {
   name = "";
 
   @Column("varchar")
-  vault_uuid = "";
-
-  @Column("varchar")
-  bts_publickey = "";
+  vault_uuid = "testUuid";
 }
