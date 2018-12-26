@@ -1,4 +1,4 @@
-import { UserController, TransferController, HealthController, CoinController } from "../controller";
+import { AccountController, TransferController, HealthController, CoinController } from "../controller";
 import * as Adapters from '../adapters';
 
 const _checkAuthentication = (req, res, next) => {
@@ -12,12 +12,19 @@ const _getBlockChain = (req, res, next) => {
 };
 
 const initRoutes = app => {
+  // Health Check Routes
   app.get('/healthCheck', _checkAuthentication, HealthController.getStatus);
+
+  // Coin Routes
   app.get('/coin/:coinId/price', _checkAuthentication, _getBlockChain, CoinController.getPrice);
-  app.get("/user/:userId/balance", _checkAuthentication, _getBlockChain, UserController.getBalance);
-  app.get("/user/:userId/transactionHistory", _checkAuthentication, _getBlockChain, UserController.getTransactionHistory);
+
+  // Account Routes
+  app.get("/account/:accountName/balance", _checkAuthentication, _getBlockChain, AccountController.getBalance);
+  app.get("/account/:accountName/txnHistory", _checkAuthentication, _getBlockChain, AccountController.getTxnHistory);
+  app.post("/account", _checkAuthentication, AccountController.createAccount);
+
+  // Transfer/Transaction Routes
   app.post("/transfer", _checkAuthentication, _getBlockChain, TransferController.transferBalance);
-  app.post("/registerUser", _checkAuthentication, _getBlockChain, UserController.registerUser);
 };
 
 export default initRoutes;
