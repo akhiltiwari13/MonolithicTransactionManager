@@ -180,11 +180,9 @@ class BitsharesAdapter {
           transfer.amount = amount;
           transfer.coin_id = 'BTS';
           transfer.txn_status = 'CONFIRMED';
-          connection.manager
-            .save(transfer)
-            .then(() => resolve(res[0].id))
-            .catch(reject);
+          return connection.manager.save(transfer);
         })
+        .then(txn => resolve(txn.txn_id))
         .catch(reject);
     });
 

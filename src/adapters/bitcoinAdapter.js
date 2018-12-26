@@ -18,42 +18,46 @@ class BitcoinAdapater {
     this.address = address;
   }
 
-  getBalance = address =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/addr/${address}/balance`;
-      return getRequest(url)
-        .then(balance => resolve({ address, balance: balance / 100000000, unit: 'BTC' }))
-        .catch(reject)
-    });
+  getBalance = (headers, accountName) =>
+    new Promise(async (resolve, reject) =>
+      this._getPublicAddress(headers, accountName)
+        .then(result => {
+          const address = result.address;
+          const url = `${btcBaseUrl}/addr/${address}/balance`;
+          return getRequest(url)
+            .then(balance => resolve({ address, balance: balance / 100000000, unit: 'BTC' }))
+            .catch(reject)
+        })
+        .catch(reject));
 
-  getTransactionHistory = address =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/txs/?address=${address}`;
-      return getRequest(url)
-        .then(txnHistory => resolve({ address, txnHistory }))
-        .catch(reject)
-    });
-
-  createAccount = req =>
-    new Promise((resolve, reject) => this._registerUserToVault(req)
-      .then(result => {
-        const connection = getConnection();
-        const user = new User();
-        user.name = req.body.name;
-        user.vault_uuid = result.data.uuid;;
-        return connection.manager.save(user)
-      })
-      .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
-      .catch(reject))
+  getTransactionHistory = (headers, accountName) =>
+    new Promise((resolve, reject) =>
+      this._getPublicAddress(headers, accountName)
+        .then(result => {
+          const address = result.address;
+          const url = `${btcBaseUrl}/txs/?address=${address}`;
+          return getRequest(url)
+            .then(txnHistory => resolve({ address, txnHistory }))
+            .catch(reject)
+        })
+        .catch(reject));
 
   transfer = req =>
     new Promise((resolve, reject) => {
-      let estimateFee, balance;
-      const senderAddress = req.body.fromAccount;
-      const receiverAddress = req.body.toAccount;
+      let estimateFee, balance, senderAddress, receiverAddress;
+      const senderAccountName = req.body.fromAccount;
+      const receiverAccountName = req.body.toAccount;
       const sendAmount = req.body.sendAmount;
 
-      return this._estimateFee()
+      return this._getPublicAddress(req.headers, senderAccountName)
+        .then(result => {
+          senderAddress = result.address;
+          return this._getPublicAddress(req.headers, receiverAccountName)
+        })
+        .then(result => {
+          receiverAddress = result.address;
+          return this._estimateFee()
+        })
         .then(feeInSatoshis => {
           estimateFee = feeInSatoshis;
           return this._getBalance(senderAddress);
@@ -64,11 +68,22 @@ class BitcoinAdapater {
         })
         .then(async (utxos) => {
           const res = await this._makeRawTransaction(senderAddress, parseInt(balance), utxos, receiverAddress, estimateFee, sendAmount)
-          return this._getSignature(res.payload, senderAddress)
+          return this._getSignature(res.payload, senderAccountName)
         })
         .then(signedTx => this._broadcastTx(signedTx))
-        .then(res => resolve(res.txid))
-        .catch(reject)
+        .then(res => {
+          const connection = getConnection();
+          const transfer = new Transfer();
+          transfer.txn_id = res.txid;
+          transfer.from = senderAccountName;
+          transfer.to = receiverAccountName;
+          transfer.amount = sendAmount * 100000000;
+          transfer.coin_id = 'BTC';
+          transfer.txn_status = 'PENDING';
+          return connection.manager.save(transfer);
+        })
+        .then(txn => resolve(txn.txn_id))
+        .catch(reject);
     })
 
   getPrice = (query) =>
@@ -127,10 +142,10 @@ class BitcoinAdapater {
         .catch(reject)
     })
 
-  _getUuid = async (registrarAccount) => {
+  _getUuid = async (accountName) => {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
-    const registrar = await UserRepository.findOne({ name: registrarAccount });
+    const registrar = await UserRepository.findOne({ name: accountName });
     return registrar.vault_uuid;
   }
 
@@ -201,9 +216,9 @@ class BitcoinAdapater {
         .catch(reject);
     });
 
-  _getPublicAddress = (req, senderName) =>
+  _getPublicAddress = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
-      const senderUuid = await this._getUuid(senderName);
+      const senderUuid = await this._getUuid(accountName);
       const coinId = envConfig.get('env') === 'development' ? 1 : 0;
       const body = {
         coinType: coinId,
@@ -211,7 +226,7 @@ class BitcoinAdapater {
         uuid: senderUuid
       };
       const url = `${vaultBaseUrl}/api/address`;
-      const headers = { "x-vault-token": req.headers["x-vault-token"] };
+      headers = { "x-vault-token": headers["x-vault-token"] };
       return postRequest(url, body, headers)
         .then(res => resolve(res.data))
         .catch(reject);
