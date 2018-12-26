@@ -16,14 +16,15 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getBalance = accountName =>
-    new Promise((resolve, reject) =>
+  getBalance = (headers, accountName) =>
+    new Promise((resolve, reject) => {
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
-        .catch(reject));
+        .catch(reject)
+    })
 
-  getTransactionHistory = accountName =>
+  getTransactionHistory = (headers, accountName) =>
     new Promise((resolve, reject) => {
       return Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
         .init_promise.then(() => ChainStore.init())
@@ -107,11 +108,9 @@ class BitsharesAdapter {
               const user = new User();
               user.name = accountName;
               user.vault_uuid = userUuidVault;
-              connection.manager
-                .save(user)
-                .then(() => resolve(res[0].id))
-                .catch(reject);
+              return connection.manager.save(user)
             })
+            .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
             .catch(reject);
         })
         .catch(reject);
@@ -191,10 +190,11 @@ class BitsharesAdapter {
 
   getPrice = (query) =>
     new Promise((resolve, reject) => {
-      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${query.currency}`;
+      const currency = query.currency || 'USD';
+      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${currency}`;
       const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
       return getRequest(url, {}, headers)
-        .then(result => resolve({ coin: 'UDOO', [query.currency]: result[query.currency] }))
+        .then(result => resolve({ coin: 'UDOO', [currency]: result[currency] }))
         .catch(reject);
     });
 
