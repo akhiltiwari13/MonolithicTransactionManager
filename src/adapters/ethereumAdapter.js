@@ -1,7 +1,9 @@
-import { postRequest } from "../lib/request";
+import { postRequest, getRequest } from "../lib/request";
 import envConfig from "../../config/envConfig";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
+import { Transfer } from "../entity/transfer";
+
 
 
 /* required constants for ethereum adapter */
@@ -10,6 +12,9 @@ import { User } from "../entity/user";
 
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
+const priceBaseUrl = envConfig.get("priceBaseUrl");
+const ethChainId = 3; // 1 for mainnet and 3 for testnet
+
 
 /* ETH Transaction */
 if (typeof web3 !== 'undefined') {
@@ -64,6 +69,58 @@ class EthereumAdapter {
                 .catch(reject)
         })
 
+    getPrice = (query) =>
+        new Promise((resolve, reject) => {
+            const url = `${priceBaseUrl}/data/price?fsym=ETH&tsyms=${query.currency}`;
+            const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+            return getRequest(url, {}, headers)
+                .then(result => resolve({ coin: 'ETH', [query.currency]: result[query.currency] }))
+                .catch(reject);
+        });
+
+
+    transfer = req =>
+        new Promise(async (resolve, reject) => {
+            const fromAccountUUID = await this._getUuid(req.body.fromAccount);
+            const toAccountUUID = await this._getUuid(req.body.toAccount);
+            const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID);
+            const toAccountAddress = await this._getAddress(req.headers, toAccountUUID);
+            const gasPrice = await this._getGasPrice();
+            const gasLimit = await this._getGas("", fromAccountAddress, toAccountAddress);
+            const amount = await this._getWeiFromEth(req.body.sendAmount);
+            const nounce = await this._getNounce(fromAccountAddress);
+
+            const payload = {
+                nonce: nounce,
+                value: Number(amount),
+                gasLimit: gasLimit,
+                gasPrice: gasPrice,
+                to: toAccountAddress,
+                data: "", // what will this take?
+                chainId: ethChainId
+            }
+            return this._signTransaction(payload, fromAccountUUID)
+                .then(signedTransaction => {
+                    console.log("signedTransaction: ", signedTransaction)
+                    const transactionHash = web3.eth.sendRawTransaction(signedTransaction.signature);
+                    return transactionHash;
+                })
+                .then(res => {
+                    const connection = getConnection();
+                    const transfer = new Transfer();
+                    transfer.txn_id = res;
+                    transfer.from = req.body.fromAccount;
+                    transfer.to = req.body.toAccount;
+                    transfer.amount = req.body.sendAmount;
+                    transfer.coin_id = 'ETH';
+                    transfer.txn_status = 'PENDING';
+                    connection.manager
+                        .save(transfer)
+                        .then(() => resolve(res))
+                        .catch(reject);
+                })
+                .catch(reject);
+        });
     _registerUserToVault = req =>
         new Promise((resolve, reject) => {
             const url = `${vaultBaseUrl}/api/register`;
@@ -108,7 +165,6 @@ class EthereumAdapter {
     }
 
     _getNounce = async (fromAccount) => {
-        // console.log("inside _getNounce")
         const nounce = await web3.eth.getTransactionCount(fromAccount);
         return nounce;
     }
@@ -117,58 +173,9 @@ class EthereumAdapter {
         return web3.toWei(amount, 'ether');
     }
 
-    transfer = req =>
-        new Promise(async (resolve, reject) => {
-            // console.log("@@@ transfer BEGIN @@@");
-            const fromAccountUUID = await this._getUuid(req.body.fromAccount); // console.log("fromAccountUUID:", fromAccountUUID);
-            const toAccountUUID = await this._getUuid(req.body.toAccount); // console.log("toAccountUUID:", toAccountUUID);
-            const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID); // console.log("fromAccountAddress: ", fromAccountAddress);
-            const toAccountAddress = await this._getAddress(req.headers, toAccountUUID); // console.log("toAccountAddress: ", toAccountAddress);
-            const gasPrice = await this._getGasPrice(); // console.log("gasPrice:", gasPrice);
-            const gasLimit = await this._getGas("", fromAccountAddress, toAccountAddress); // console.log("gasLimit:", gasLimit);
-            const amount = await this._getWeiFromEth(req.body.sendAmount); //console.log("amount:", amount); //converting to wei
-            const nounce = await this._getNounce(fromAccountAddress); //console.log("nounce:", nounce);
-
-            // what will be the value for gasLimit and chain id? is it hardcoded?
-            const payload = {
-                nonce: nounce,
-                value: Number(amount),
-                gasLimit: gasLimit,
-                gasPrice: gasPrice,
-                to: toAccountAddress,
-                data: "", // what will this take?
-                chainId: 1 // 1 for mainnet and 3 for testnet
-            }
-            // const payload= {
-            //     "nonce":0,
-            //     "value":10000000000000000000,
-            //     "gasLimit":21000,
-            //     "gasPrice":1500000000,
-            //     "to":"0xD60183AF455b08afE7E0B6A77D58411Fe59ee17D",
-            //     "data":"",
-            //     "chainId":1
-            //   };
-            // console.log("PAYLOAD: ", payload);
-
-            // console.log("data: ", data);
-
-            // ==>SIGN THE TRANSACTION FROM THE VAULT<==
-            return this._signTransaction(payload, fromAccountUUID)
-                .then(signedTransaction => {
-                    console.log("signedTransaction: ", signedTransaction)
-                    const transactionHash = web3.eth.sendRawTransaction(signedTransaction.signature);
-                    return resolve(true);
-                })
-                .catch(reject);
-        });
-
-
     _signTransaction = (payload, fromAccountUUID) => //LOG HERE....
         new Promise(async (resolve, reject) => {
             const url = `${vaultBaseUrl}/api/signature`;
-            // console.log("JSON.stringify(payload): ", JSON.stringify(payload));
-
-            // to be sent to 
             const body = {
                 "coinType": 60,
                 "path": "m/44'/60'/0'/0/0",
