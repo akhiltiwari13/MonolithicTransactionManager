@@ -103,7 +103,7 @@ class BitcoinAdapater {
     let totalInput = 0
     let totalUTXOEntered = 0
     let i = 0
-    let bitcoinTransactionFee = (34 * 2 + 10) * (Math.round(estimateFee / 1000))
+    let bitcoinTransactionFee = (34 * 10) * (Math.round(estimateFee / 1000))
     for (i = 0; i < utxos.length; i += 1) {
       const currentUtxo = utxos[i]
       totalInput = totalInput + parseInt(currentUtxo.satoshis, 10)
