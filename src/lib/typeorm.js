@@ -1,4 +1,5 @@
 import { createConnection } from "typeorm";
+import logger from './logger';
 
 const connectDB = () => {
   return new Promise(async (resolve, reject) => {
