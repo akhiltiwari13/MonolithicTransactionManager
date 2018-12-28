@@ -1,15 +1,15 @@
 # Howdoo-Blockchain-Service
 
 ## Introduction
-
 This is a monolithic Blockchain Service that exposes APIs for communicating with three blockchain networks namely Bitshares, Ethereum and Bitcoin. For Dev environment, Testnets of the aforementioned blockchians are utilized, details are below. The primary purpose of this API includes functionalities for: 
 1. Transferring BTS (bitshares' token) on Howdoo's internal blockchain and Fetching the balance for accounts/address for the three blockchain network.
 2. Getting the Price for the uDoo tokens.
 3. Getting the transaction history for the accounts on the 3 blockchain networks.
+4. Creates account on the Vault and it's counterpart on the bitshares testnet.
 
 This readme guides you through two processes:-
 
-1. How to set up the project
+1. How to set up the project with all the dependent modules.
 2. Has a Postman collection specified to get you toying around with the project. 
 
 # Postman Collection
