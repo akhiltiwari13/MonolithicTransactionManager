@@ -17,6 +17,13 @@ class BitsharesAdapter {
     this.name = name;
   }
 
+  getStatus = async (txnId) => {
+    const connection = getConnection();
+    const TransferRepository = connection.getRepository(Transfer);
+    const transaction = await TransferRepository.findOne({ txn_id: txnId });
+    return transaction.txn_status;
+  }
+
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
