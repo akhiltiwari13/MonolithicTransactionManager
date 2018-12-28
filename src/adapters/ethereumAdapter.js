@@ -3,6 +3,7 @@ import envConfig from "../../config/envConfig";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
+import request from "request"; // for the socket hang up error
 
 
 
@@ -118,6 +119,40 @@ class EthereumAdapter {
                 })
                 .catch(reject);
         });
+
+
+    getTransactionHistory = (headers, accountName) =>
+        new Promise(async (resolve, reject) => {
+            const uuid = await this._getUuid(accountName);
+            console.log("uuid: ", uuid);
+            return this._getAddress(headers, uuid)
+                .then(address => {
+                    //  setting startBlockNumber and endBlockNumber 
+                    var endBlockNumber = web3.eth.blockNumber;
+                    var startBlockNumber = 0;
+
+
+                    // fetch etherscanApiEndPoint from the config file.
+                    // var etherscanApiEndPoint = "https://api.etherscan.io/api" 
+                    var etherscanRopstenApiEndPointURL = "http://ropsten.etherscan.io/api";
+                    var apiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
+
+                    const url = `${etherscanRopstenApiEndPointURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${apiKey}`;
+                    console.log("url: ", url);
+
+                    // using getRequest from lib gives "socket hang up" exception.
+                    request.get(url, (error, response, body) => {
+                        if (error) {
+                            return error
+                        }
+                        // console.log("error:", error);
+                        // console.log("response:", response);
+                        return resolve(JSON.parse(body))
+                    })
+                })
+                .catch(reject)
+        })
+
     _registerUserToVault = req =>
         new Promise((resolve, reject) => {
             const url = `${vaultBaseUrl}/api/register`;
@@ -190,43 +225,6 @@ class EthereumAdapter {
                 })
                 .catch(reject);
         });
-
-
-
-
-    // TO BE WORKED ON.....
-    getTransactionHistory = (headers, accountName) =>
-        new Promise(async (resolve, reject) => {
-            const uuid = await this._getUuid(accountName);
-            console.log("uuid: ", uuid);
-            return this._getAddress(headers, uuid)
-                .then(address => {
-                    console.log("address: ", address);
-
-                    //  setting endBlockNumber
-                    var endBlockNumber = web3.eth.blockNumber;
-                    console.log("Using endBlockNumber: " + endBlockNumber);
-
-                    // setting startBlockNumber
-                    var startBlockNumber = 0;
-                    console.log("Using startBlockNumber: " + startBlockNumber);
-                    console.log("Searching for transactions to/from account \"" + address + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
-
-                    // var etherscanApiEndPoint = "https://api.etherscan.io/api" //==>>how to use it?
-                    var etherscanRopstenApiEndPointURL = "http://ropsten.etherscan.io/api";
-                    var apiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
-
-                    const url = `${etherscanRopstenApiEndPointURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${apiKey}`;
-                    console.log("url: ", url);
-                    return getRequest(url)
-                        .then(result => {
-                            console.log("result: ", result);
-                            return resolve(result)
-                        })
-                        .catch(reject);
-                })
-                .catch(reject)
-        })
 }
 
 export default EthereumAdapter;
