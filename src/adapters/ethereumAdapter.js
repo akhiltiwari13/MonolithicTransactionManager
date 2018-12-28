@@ -5,7 +5,6 @@ import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 
 
-
 /* required constants for ethereum adapter */
 // const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
