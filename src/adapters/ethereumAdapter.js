@@ -9,14 +9,12 @@ import { Transfer } from "../entity/transfer";
 /* required constants for ethereum adapter */
 // const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
-
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = 3; // 1 for mainnet and 3 for testnet
 
 
-/* ETH Transaction */
 if (typeof web3 !== 'undefined') {
     console.log('Web3 found');
     var web3 = new Web3(web3.currentProvider);
@@ -30,7 +28,6 @@ class EthereumAdapter {
         this.name = name;
     }
 
-    // account creation for ethereum only requires the account be created on the Vault
     createAccount = req =>
         new Promise((resolve, reject) => {
             let userUuidVault;
@@ -55,7 +52,7 @@ class EthereumAdapter {
                 .catch(reject);
         });
 
-    // developed and working; need to test.
+
     getBalance = (headers, accountName) =>
         new Promise(async (resolve, reject) => {
             const uuid = await this._getUuid(accountName);
@@ -72,7 +69,7 @@ class EthereumAdapter {
     getPrice = (query) =>
         new Promise((resolve, reject) => {
             const url = `${priceBaseUrl}/data/price?fsym=ETH&tsyms=${query.currency}`;
-            const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+            const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' }; //Apikey to be fetched from a config file
             return getRequest(url, {}, headers)
                 .then(result => resolve({ coin: 'ETH', [query.currency]: result[query.currency] }))
                 .catch(reject);
@@ -96,7 +93,7 @@ class EthereumAdapter {
                 gasLimit: gasLimit,
                 gasPrice: gasPrice,
                 to: toAccountAddress,
-                data: "", // what will this take?
+                data: "", // empty for a regular transfer.
                 chainId: ethChainId
             }
             return this._signTransaction(payload, fromAccountUUID)
@@ -130,7 +127,6 @@ class EthereumAdapter {
                 .catch(reject);
         });
 
-    // utility function to get the address for the account. 
     _getAddress = (headers, uuid) =>
         new Promise((resolve, reject) => {
             const body = {
@@ -173,7 +169,7 @@ class EthereumAdapter {
         return web3.toWei(amount, 'ether');
     }
 
-    _signTransaction = (payload, fromAccountUUID) => //LOG HERE....
+    _signTransaction = (payload, fromAccountUUID) =>
         new Promise(async (resolve, reject) => {
             const url = `${vaultBaseUrl}/api/signature`;
             const body = {
@@ -183,8 +179,7 @@ class EthereumAdapter {
                 "uuid": fromAccountUUID
             }
             console.log("body: ", body);
-            // needs to be passed as parameters instead...
-            const headers = {
+            const headers = {  // needs to be passed as parameters instead...
                 "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
                 "Content-Type": "application/json"
             };
@@ -200,20 +195,38 @@ class EthereumAdapter {
 
 
     // TO BE WORKED ON.....
-    getTransactionHistory = accountName =>
+    getTransactionHistory = (headers, accountName) =>
         new Promise(async (resolve, reject) => {
             const uuid = await this._getUuid(accountName);
+            console.log("uuid: ", uuid);
             return this._getAddress(headers, uuid)
-                .then(res => {
-                    console.log("address,", res) // returns address; needs business logic to actually fetch the balance.
-                    return res;
-                })
-                .then(res => {
-                    return resolve(web3.eth.getBalance(res)); // business logic for transaction history
+                .then(address => {
+                    console.log("address: ", address);
+
+                    //  setting endBlockNumber
+                    var endBlockNumber = web3.eth.blockNumber;
+                    console.log("Using endBlockNumber: " + endBlockNumber);
+
+                    // setting startBlockNumber
+                    var startBlockNumber = 0;
+                    console.log("Using startBlockNumber: " + startBlockNumber);
+                    console.log("Searching for transactions to/from account \"" + address + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
+
+                    // var etherscanApiEndPoint = "https://api.etherscan.io/api" //==>>how to use it?
+                    var etherscanRopstenApiEndPointURL = "http://ropsten.etherscan.io/api";
+                    var apiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
+
+                    const url = `${etherscanRopstenApiEndPointURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${apiKey}`;
+                    console.log("url: ", url);
+                    return getRequest(url)
+                        .then(result => {
+                            console.log("result: ", result);
+                            return resolve(result)
+                        })
+                        .catch(reject);
                 })
                 .catch(reject)
         })
-
 }
 
 export default EthereumAdapter;
