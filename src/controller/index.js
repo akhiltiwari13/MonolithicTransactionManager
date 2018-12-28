@@ -1,6 +1,6 @@
 import AccountController from './accountController';
-import TransferController from './transferController';
+import TransactionController from './transactionController';
 import HealthController from './healthController';
 import CoinController from './coinController';
 
-export { AccountController, TransferController, HealthController, CoinController };
+export { AccountController, TransactionController, HealthController, CoinController };
