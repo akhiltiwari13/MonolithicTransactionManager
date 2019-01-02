@@ -38,8 +38,12 @@ class BitcoinAdapater {
 
 
   getTransactionHistory = (headers, accountName) =>
-    new Promise((resolve, reject) =>
-      this._getPublicAddress(headers, accountName)
+    new Promise(async (resolve, reject) => {
+      const isAccountExists = await this._getUuid(accountName);
+      if (!isAccountExists) {
+        return reject(new ParameterInvalidError('Account does not exists'));
+      }
+      return this._getPublicAddress(headers, accountName)
         .then(result => {
           const address = result.address;
           const url = `${btcBaseUrl}/txs/?address=${address}`;
@@ -47,7 +51,8 @@ class BitcoinAdapater {
             .then(txnHistory => resolve({ address, txnHistory }))
             .catch(reject)
         })
-        .catch(reject));
+        .catch(reject)
+    });
 
   transfer = req =>
     new Promise((resolve, reject) => {

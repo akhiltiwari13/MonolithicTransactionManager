@@ -30,8 +30,12 @@ class BitsharesAdapter {
     })
 
   getTransactionHistory = (headers, accountName) =>
-    new Promise((resolve, reject) =>
-      Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
+    new Promise(async (resolve, reject) => {
+      const isAccountExists = await this._getUuid(accountName);
+      if (!isAccountExists) {
+        return reject(new ParameterInvalidError('Account does not exists'));
+      }
+      return Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
         .init_promise.then(() => ChainStore.init())
         .then(() => this._getAccountId(`hwd${accountName}`))
         .then(accountId => Promise.all([FetchChain("fetchFullAccount", accountId)]))
@@ -39,7 +43,8 @@ class BitsharesAdapter {
           let [fullAccountHistory] = res;
           resolve(fullAccountHistory.get("history"));
         })
-        .catch(reject));
+        .catch(reject)
+    });
 
   createAccount = req =>
     new Promise((resolve, reject) => {
