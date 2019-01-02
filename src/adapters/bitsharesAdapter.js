@@ -48,6 +48,9 @@ class BitsharesAdapter {
 
   createAccount = req =>
     new Promise((resolve, reject) => {
+      if (!req.body.name) {
+        return reject(new ParameterInvalidError('Account name is required'));
+      }
       let userUuidVault, publicKey, chainId;
       return this._registerUserToVault(req)
         .then(result => {
@@ -120,9 +123,9 @@ class BitsharesAdapter {
               return connection.manager.save(user)
             })
             .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
-            .catch(reject);
+            .catch(err => reject(new ParameterInvalidError('Error in account creation')));
         })
-        .catch(reject);
+        .catch(error => reject(new ParameterInvalidError('Error while registering account to vault')));
     });
 
   transfer = req =>

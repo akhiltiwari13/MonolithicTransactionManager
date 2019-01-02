@@ -36,7 +36,6 @@ class BitcoinAdapater {
         .catch(reject)
     });
 
-
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
