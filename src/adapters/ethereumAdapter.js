@@ -225,5 +225,4 @@ class EthereumAdapter {
                 .catch(reject);
         });
 }
-
 export default EthereumAdapter;
