@@ -125,6 +125,15 @@ class BitsharesAdapter {
 
   transfer = req =>
     new Promise((resolve, reject) => {
+      if (!req.body.fromAccount) {
+        return reject(new ParameterInvalidError('fromAccount is mandatory'));
+      }
+      if (!req.body.toAccount) {
+        return reject(new ParameterInvalidError('toAccount is mandatory'));
+      }
+      if (!req.body.sendAmount) {
+        return reject(new ParameterInvalidError('sendAmount is mandatory'));
+      }
       let chainId;
       const fromAccount = req.body.fromAccount;
       const toAccount = req.body.toAccount;
@@ -192,7 +201,8 @@ class BitsharesAdapter {
             .then(() => resolve(res[0].id))
             .catch(reject);
         })
-        .catch(reject);
+        .then(txn => resolve(txn.txn_id))
+        .catch(err => reject(new ParameterInvalidError('Error in Transaction')));
     });
 
   getPrice = (query) =>
