@@ -99,7 +99,21 @@ const schema = {
     default: "http://192.168.10.81:8200/v1",
     env: "VAULT_BASE_URL",
     arg: "vault_base_url"
-  }
+  },
+  ethBaseUrl: {
+    doc: "Contains baseUrl for ETH testnet node, which this service connects to",
+    format: String,
+    default: "https://ropsten.infura.io/v3/90bfb15e855e41a8997b24d5f7a170e1",
+    env: "ETH_BASE_URL",
+    arg: "eth_base_url"
+  },
+  ethscanBaseUrl: {
+    doc: "Contains baseUrl for etherScan api, which is used in fetching transaction history",
+    format: String,
+    default: "http://ropsten.etherscan.io/api",
+    env: "ETHSCN_BASE_URL",
+    arg: "ethscn_base_url"
+  },
 };
 
 const envConfig = convict(schema);

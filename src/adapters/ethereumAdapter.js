@@ -7,20 +7,20 @@ import request from "request"; // for the socket hang up error
 
 
 /* required constants for ethereum adapter */
-// const ETHEREUM_NODE_URL = `${config.get('ethereum_node_url.protocol')}${config.get('ethereum_node_url.host')}` ==> can this be used
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = 3; // 1 for mainnet and 3 for testnet
+const etherscanApiURL = envConfig.get("ethscanBaseUrl")
+const etherscanApiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
+const ethereumNodeURL = envConfig.get("ethBaseUrl")
 
 
 if (typeof web3 !== 'undefined') {
-    console.log('Web3 found');
     var web3 = new Web3(web3.currentProvider);
 } else {
-    // provider needs to be set from a config file.
-    var web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/90bfb15e855e41a8997b24d5f7a170e1"));
+    var web3 = new Web3(new Web3.providers.HttpProvider(ethereumNodeURL));
 }
 
 class EthereumAdapter {
@@ -98,7 +98,6 @@ class EthereumAdapter {
             }
             return this._signTransaction(payload, fromAccountUUID)
                 .then(signedTransaction => {
-                    console.log("signedTransaction: ", signedTransaction)
                     const transactionHash = web3.eth.sendRawTransaction(signedTransaction.signature);
                     return transactionHash;
                 })
@@ -123,29 +122,16 @@ class EthereumAdapter {
     getTransactionHistory = (headers, accountName) =>
         new Promise(async (resolve, reject) => {
             const uuid = await this._getUuid(accountName);
-            console.log("uuid: ", uuid);
             return this._getAddress(headers, uuid)
                 .then(address => {
                     //  setting startBlockNumber and endBlockNumber 
                     var endBlockNumber = web3.eth.blockNumber;
                     var startBlockNumber = 0;
-
-
-                    // fetch etherscanApiEndPoint from the config file.
-                    // var etherscanApiEndPoint = "https://api.etherscan.io/api" 
-                    var etherscanRopstenApiEndPointURL = "http://ropsten.etherscan.io/api";
-                    var apiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
-
-                    const url = `${etherscanRopstenApiEndPointURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${apiKey}`;
-                    console.log("url: ", url);
-
-                    // using getRequest from lib gives "socket hang up" exception.
-                    request.get(url, (error, response, body) => {
+                    const url = `${etherscanApiURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${etherscanApiKey}`;
+                    request.get(url, (error, response, body) => { // using getRequest from lib gives "socket hang up" exception.
                         if (error) {
                             return error
                         }
-                        // console.log("error:", error);
-                        // console.log("response:", response);
                         return resolve(JSON.parse(body))
                     })
                 })
@@ -212,14 +198,12 @@ class EthereumAdapter {
                 "payload": JSON.stringify(payload),
                 "uuid": fromAccountUUID
             }
-            console.log("body: ", body);
             const headers = {  // needs to be passed as parameters instead...
                 "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
                 "Content-Type": "application/json"
             };
             return postRequest(url, body, headers)
                 .then(res => {
-                    console.log("res:", res);
                     return resolve(res.data);
                 })
                 .catch(reject);
