@@ -34,19 +34,8 @@ Responder.deleted = (res) => {
 
 Responder.operationFailed = (res, reason) => {
   const status = reason.status || 400
-  if (reason.name === 'SequelizeUniqueConstraintError') {
-    reason = reason.errors.map((er) => {
-      let errors = {}
-      errors[er.path] = er.message
-      return errors
-    })
-  } else {
-    reason = reason.message || reason
-  }
-  delete reason.status
-  let errors = [reason]
-  if (reason instanceof Object) errors = _.flatten(_.flatMap(reason).map((object) => { return _.flatMap(object) }))
-  return sendResponse(res, status, { reason, errors })
+  reason = reason.message || 'Reason Unknown'
+  return sendResponse(res, status, { reason })
 }
 
 export default Responder

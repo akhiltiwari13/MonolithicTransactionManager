@@ -6,6 +6,7 @@ import { BigNumber } from 'bignumber.js'
 import { Transfer } from "../entity/transfer";
 import { TransactionBuilder, networks } from 'bitcoinjs-lib';
 import _ from 'lodash';
+import { ParameterInvalidError } from '../errors'
 
 const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -86,12 +87,21 @@ class BitcoinAdapater {
         .catch(reject);
     })
 
-  getPrice = (query) =>
+  getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
-      const url = `${priceBaseUrl}/data/price?fsym=BTC&tsyms=${query.currency}`;
+      if (coin !== 'BTC') {
+        throw new ParameterInvalidError('Coin and Blockchain mismatched');
+      }
+      const currency = query.currency || 'USD';
+      const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
       const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
       return getRequest(url, {}, headers)
-        .then(result => resolve({ coin: 'BTC', [query.currency]: result[query.currency] }))
+        .then(result => {
+          if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
+            throw new ParameterInvalidError('Invalid Currency');
+          }
+          return resolve({ coin, [currency]: result[currency] })
+        })
         .catch(reject);
     });
 

@@ -1,6 +1,7 @@
 import BitcoinAdapter from './bitcoinAdapter';
 import BitsharesAdapter from './bitsharesAdapter';
 // import EthereumAdapter from './ethereumAdapter';
+import { BadRequestError } from '../errors';
 
 export const getBlockchain = (blockchain) => {
   switch (blockchain) {
@@ -11,7 +12,7 @@ export const getBlockchain = (blockchain) => {
     case 'BTS':
       return new BitsharesAdapter();
     default:
-      throw new Error('Unknown Blockchain Passed');
+      throw new BadRequestError('Unknown Blockchain Passed');
   }
 }
 

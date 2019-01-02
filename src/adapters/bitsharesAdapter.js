@@ -6,6 +6,7 @@ import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
+import { ParameterInvalidError } from '../errors'
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -17,16 +18,15 @@ class BitsharesAdapter {
   }
 
   getBalance = (headers, accountName) =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
-        .catch(reject)
-    })
+        .catch(reject))
 
   getTransactionHistory = (headers, accountName) =>
-    new Promise((resolve, reject) => {
-      return Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
+    new Promise((resolve, reject) =>
+      Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
         .init_promise.then(() => ChainStore.init())
         .then(() => this._getAccountId(`hwd${accountName}`))
         .then(accountId => Promise.all([FetchChain("fetchFullAccount", accountId)]))
@@ -34,8 +34,7 @@ class BitsharesAdapter {
           let [fullAccountHistory] = res;
           resolve(fullAccountHistory.get("history"));
         })
-        .catch(reject);
-    });
+        .catch(reject));
 
   createAccount = req =>
     new Promise((resolve, reject) => {
@@ -186,13 +185,21 @@ class BitsharesAdapter {
         .catch(reject);
     });
 
-  getPrice = (query) =>
+  getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
+      if (coin !== 'BTS') {
+        throw new ParameterInvalidError('Coin and Blockchain mismatched');
+      }
       const currency = query.currency || 'USD';
-      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${currency}`;
+      const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
       const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
       return getRequest(url, {}, headers)
-        .then(result => resolve({ coin: 'UDOO', [currency]: result[currency] }))
+        .then(result => {
+          if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
+            throw new ParameterInvalidError('Invalid Currency');
+          }
+          return resolve({ coin, [currency]: result[currency] })
+        })
         .catch(reject);
     });
 
