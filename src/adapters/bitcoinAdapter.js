@@ -20,16 +20,22 @@ class BitcoinAdapater {
   }
 
   getBalance = (headers, accountName) =>
-    new Promise(async (resolve, reject) =>
-      this._getPublicAddress(headers, accountName)
+    new Promise(async (resolve, reject) => {
+      const isAccountExists = await this._getUuid(accountName);
+      if (!isAccountExists) {
+        return reject(new ParameterInvalidError('Account does not exists'));
+      }
+      return this._getPublicAddress(headers, accountName)
         .then(result => {
           const address = result.address;
           const url = `${btcBaseUrl}/addr/${address}/balance`;
           return getRequest(url)
-            .then(balance => resolve({ address, balance: balance / 100000000, unit: 'BTC' }))
+            .then(balance => resolve({ accountName, balance: balance / 100000000, unit: 'BTC' }))
             .catch(reject)
         })
-        .catch(reject));
+        .catch(reject)
+    });
+
 
   getTransactionHistory = (headers, accountName) =>
     new Promise((resolve, reject) =>
@@ -90,7 +96,7 @@ class BitcoinAdapater {
   getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
       if (coin !== 'BTC') {
-        throw new ParameterInvalidError('Coin and Blockchain mismatched');
+        return reject(new ParameterInvalidError('Coin and Blockchain mismatched'));
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
@@ -98,7 +104,7 @@ class BitcoinAdapater {
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
-            throw new ParameterInvalidError('Invalid Currency');
+            return reject(new ParameterInvalidError('Invalid Currency'));
           }
           return resolve({ coin, [currency]: result[currency] })
         })
@@ -156,6 +162,7 @@ class BitcoinAdapater {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
     const registrar = await UserRepository.findOne({ name: accountName });
+    if (!registrar) return false;
     return registrar.vault_uuid;
   }
 

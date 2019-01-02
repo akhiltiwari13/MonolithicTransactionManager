@@ -18,11 +18,16 @@ class BitsharesAdapter {
   }
 
   getBalance = (headers, accountName) =>
-    new Promise((resolve, reject) =>
-      this._getAccountId(`hwd${accountName}`)
+    new Promise(async (resolve, reject) => {
+      const isAccountExists = await this._getUuid(accountName);
+      if (!isAccountExists) {
+        return reject(new ParameterInvalidError('Account does not exists'));
+      }
+      return this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
-        .catch(reject))
+        .catch(reject)
+    })
 
   getTransactionHistory = (headers, accountName) =>
     new Promise((resolve, reject) =>
@@ -188,7 +193,7 @@ class BitsharesAdapter {
   getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
       if (coin !== 'BTS') {
-        throw new ParameterInvalidError('Coin and Blockchain mismatched');
+        return reject(new ParameterInvalidError('Coin and Blockchain mismatched'));
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
@@ -196,7 +201,7 @@ class BitsharesAdapter {
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
-            throw new ParameterInvalidError('Invalid Currency');
+            return reject(new ParameterInvalidError('Invalid Currency'));
           }
           return resolve({ coin, [currency]: result[currency] })
         })
@@ -230,6 +235,7 @@ class BitsharesAdapter {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
     const registrar = await UserRepository.findOne({ name: accountName });
+    if (!registrar) return false;
     return registrar.vault_uuid;
   }
 
