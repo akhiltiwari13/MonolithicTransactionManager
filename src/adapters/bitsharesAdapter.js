@@ -17,7 +17,7 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getStatus = (blockchain , txnId) =>
+  getStatus = (blockchain, txnId) =>
     new Promise(async (resolve, reject) => {
       const connection = getConnection();
       const TransferRepository = connection.getRepository(Transfer);
@@ -57,7 +57,7 @@ class BitsharesAdapter {
         .catch(reject)
     });
 
-  registerUser = req =>
+  createAccount = req =>
     new Promise((resolve, reject) => {
       if (!req.body.name) {
         return reject(new BadRequestError('Account name is required'));
@@ -233,24 +233,6 @@ class BitsharesAdapter {
           }
           return resolve({ coin, [currency]: result[currency] })
         })
-        .catch(reject);
-    });
-
-  getPrice = (query) =>
-    new Promise((resolve, reject) => {
-      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${query.currency}`;
-      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
-      return getRequest(url, {}, headers)
-        .then(result => resolve({ coin: 'UDOO', [query.currency]: result[query.currency] }))
-        .catch(reject);
-    });
-
-  getPrice = (query) =>
-    new Promise((resolve, reject) => {
-      const url = `${priceBaseUrl}/data/price?fsym=UDOO&tsyms=${query.currency}`;
-      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
-      return getRequest(url, {}, headers)
-        .then(result => resolve({ coin: 'UDOO', [query.currency]: result[query.currency] }))
         .catch(reject);
     });
 

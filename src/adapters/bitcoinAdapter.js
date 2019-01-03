@@ -66,6 +66,15 @@ class BitcoinAdapater {
 
   transfer = req =>
     new Promise((resolve, reject) => {
+      if (!req.body.fromAccount) {
+        return reject(new BadRequestError('fromAccount is mandatory'));
+      }
+      if (!req.body.toAccount) {
+        return reject(new BadRequestError('toAccount is mandatory'));
+      }
+      if (!req.body.sendAmount) {
+        return reject(new BadRequestError('sendAmount is mandatory'));
+      }
       let estimateFee, balance, senderAddress, receiverAddress;
       const senderAccountName = req.body.fromAccount;
       const receiverAccountName = req.body.toAccount;
@@ -239,50 +248,6 @@ class BitcoinAdapater {
         .catch(reject)
     })
 
-  transfer = req =>
-    new Promise((resolve, reject) => {
-      let estimateFee, balance, senderAddress, receiverAddress;
-      const senderAccountName = req.body.fromAccount;
-      const receiverAccountName = req.body.toAccount;
-      const sendAmount = req.body.sendAmount;
-
-      return this._getPublicAddress(req.headers, senderAccountName)
-        .then(result => {
-          senderAddress = result.address;
-          return this._getPublicAddress(req.headers, receiverAccountName)
-        })
-        .then(result => {
-          receiverAddress = result.address;
-          return this._estimateFee()
-        })
-        .then(feeInSatoshis => {
-          estimateFee = feeInSatoshis;
-          return this._getBalance(senderAddress);
-        })
-        .then(balanceInSatoshis => {
-          balance = balanceInSatoshis;
-          return this._getUtxo(senderAddress);
-        })
-        .then(async (utxos) => {
-          const res = await this._makeRawTransaction(senderAddress, parseInt(balance), utxos, receiverAddress, estimateFee, sendAmount)
-          return this._getSignature(res.payload, senderAccountName)
-        })
-        .then(signedTx => this._broadcastTx(signedTx))
-        .then(res => {
-          const connection = getConnection();
-          const transfer = new Transfer();
-          transfer.txn_id = res.txid;
-          transfer.from = senderAccountName;
-          transfer.to = receiverAccountName;
-          transfer.amount = sendAmount * 100000000;
-          transfer.coin_id = 'BTC';
-          transfer.txn_status = 'PENDING';
-          return connection.manager.save(transfer);
-        })
-        .then(txn => resolve(txn.txn_id))
-        .catch(reject);
-    })
-
   _makeRawTransaction = async (senderAddress, balance, utxos, receiverAddress, estimateFee, sendAmount) => {
     const blockchainNetworkBitcoinjsLib = envConfig.get('env') === 'production' ? networks.bitcoin : networks.testnet
     const payload = { inputs: [], outputs: [] }
@@ -329,13 +294,6 @@ class BitcoinAdapater {
         .then(resolve)
         .catch(reject)
     })
-
-  _getUuid = async (accountName) => {
-    const connection = getConnection();
-    const UserRepository = connection.getRepository(User);
-    const registrar = await UserRepository.findOne({ name: accountName });
-    return registrar.vault_uuid;
-  }
 
   _getSignature = (txPayload, senderName) =>
     new Promise(async (resolve, reject) => {
