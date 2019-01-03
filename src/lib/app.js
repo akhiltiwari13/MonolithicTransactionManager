@@ -1,6 +1,7 @@
 import envConfig from "../../config/envConfig";
 import * as express from "./express";
 import logger from './logger'
+import initServices from '../services';
 import connectDB from "./typeorm";
 
 const start = async () => {
@@ -27,6 +28,10 @@ const start = async () => {
 
   const app = express.init();
   app.listen(port, appStartMessage());
+
+
+  // Initialize Services
+  initServices();
 };
 
 export default start;

@@ -16,7 +16,7 @@ export const getRequest = (url, body = {}, headers = {}) =>
     )
   );
 
-export const postRequest = (url, body, headers = { "Content-Type": "application/json" }) =>
+export const postRequest = (url, body = {}, headers = { "Content-Type": "application/json" }) =>
   new Promise((resolve, reject) =>
     request.post(
       {

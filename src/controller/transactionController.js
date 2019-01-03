@@ -9,7 +9,7 @@ export default class TransactionController {
 
   static status = (req, res) =>
     req.adapter
-      .getStatus(req.params.txnId)
+      .getStatus(req.headers.blockchain, req.params.txnId)
       .then(result => Responder.success(res, result))
       .catch(error => Responder.operationFailed(res, error));
 };
