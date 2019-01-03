@@ -6,7 +6,7 @@ import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
-import { ParameterInvalidError } from '../errors'
+import { BadRequestError } from '../errors'
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -17,18 +17,22 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getStatus = async (txnId) => {
-    const connection = getConnection();
-    const TransferRepository = connection.getRepository(Transfer);
-    const transaction = await TransferRepository.findOne({ txn_id: txnId });
-    return transaction.txn_status;
-  }
+  getStatus = (blockchain , txnId) =>
+    new Promise(async (resolve, reject) => {
+      const connection = getConnection();
+      const TransferRepository = connection.getRepository(Transfer);
+      const transaction = await TransferRepository.findOne({ txn_id: txnId, coin_id: blockchain });
+      if (!transaction) {
+        return reject(new BadRequestError('Transaction does not exists'));
+      }
+      return resolve(transaction.txn_status);
+    })
 
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
-        return reject(new ParameterInvalidError('Account does not exists'));
+        return reject(new BadRequestError('Account does not exists'));
       }
       return this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
@@ -40,7 +44,7 @@ class BitsharesAdapter {
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
-        return reject(new ParameterInvalidError('Account does not exists'));
+        return reject(new BadRequestError('Account does not exists'));
       }
       return Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL from a value from config file
         .init_promise.then(() => ChainStore.init())
@@ -56,7 +60,7 @@ class BitsharesAdapter {
   registerUser = req =>
     new Promise((resolve, reject) => {
       if (!req.body.name) {
-        return reject(new ParameterInvalidError('Account name is required'));
+        return reject(new BadRequestError('Account name is required'));
       }
       let userUuidVault, publicKey, chainId;
       return this._registerUserToVault(req)
@@ -130,21 +134,21 @@ class BitsharesAdapter {
               return connection.manager.save(user)
             })
             .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
-            .catch(err => reject(new ParameterInvalidError('Error in account creation')));
+            .catch(err => reject(new BadRequestError('Error in account creation')));
         })
-        .catch(error => reject(new ParameterInvalidError('Error while registering account to vault')));
+        .catch(error => reject(new BadRequestError('Error while registering account to vault')));
     });
 
   transfer = req =>
     new Promise((resolve, reject) => {
       if (!req.body.fromAccount) {
-        return reject(new ParameterInvalidError('fromAccount is mandatory'));
+        return reject(new BadRequestError('fromAccount is mandatory'));
       }
       if (!req.body.toAccount) {
-        return reject(new ParameterInvalidError('toAccount is mandatory'));
+        return reject(new BadRequestError('toAccount is mandatory'));
       }
       if (!req.body.sendAmount) {
-        return reject(new ParameterInvalidError('sendAmount is mandatory'));
+        return reject(new BadRequestError('sendAmount is mandatory'));
       }
       let chainId;
       const fromAccount = req.body.fromAccount;
@@ -211,13 +215,13 @@ class BitsharesAdapter {
           return connection.manager.save(transfer);
         })
         .then(txn => resolve(txn.txn_id))
-        .catch(err => reject(new ParameterInvalidError('Error in Transaction')));
+        .catch(err => reject(new BadRequestError('Error in Transaction')));
     });
 
   getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
       if (coin !== 'BTS') {
-        return reject(new ParameterInvalidError('Coin and Blockchain mismatched'));
+        return reject(new BadRequestError('Coin and Blockchain mismatched'));
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
@@ -225,7 +229,7 @@ class BitsharesAdapter {
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
-            return reject(new ParameterInvalidError('Invalid Currency'));
+            return reject(new BadRequestError('Invalid Currency'));
           }
           return resolve({ coin, [currency]: result[currency] })
         })

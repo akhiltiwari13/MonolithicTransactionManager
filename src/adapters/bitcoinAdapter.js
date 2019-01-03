@@ -6,7 +6,7 @@ import { BigNumber } from 'bignumber.js'
 import { Transfer } from "../entity/transfer";
 import { TransactionBuilder, networks } from 'bitcoinjs-lib';
 import _ from 'lodash';
-import { ParameterInvalidError } from '../errors'
+import { BadRequestError } from '../errors'
 
 const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -19,11 +19,22 @@ class BitcoinAdapater {
     this.address = address;
   }
 
+  getStatus = (blockchain, txnId) =>
+    new Promise(async (resolve, reject) => {
+      const connection = getConnection();
+      const TransferRepository = connection.getRepository(Transfer);
+      const transaction = await TransferRepository.findOne({ txn_id: txnId, coin_id: blockchain });
+      if (!transaction) {
+        return reject(new BadRequestError('Transaction does not exists'));
+      }
+      return resolve(transaction.txn_status);
+    })
+
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
-        return reject(new ParameterInvalidError('Account does not exists'));
+        return reject(new BadRequestError('Account does not exists'));
       }
       return this._getPublicAddress(headers, accountName)
         .then(result => {
@@ -40,7 +51,7 @@ class BitcoinAdapater {
     new Promise(async (resolve, reject) => {
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
-        return reject(new ParameterInvalidError('Account does not exists'));
+        return reject(new BadRequestError('Account does not exists'));
       }
       return this._getPublicAddress(headers, accountName)
         .then(result => {
@@ -100,7 +111,7 @@ class BitcoinAdapater {
   getPrice = (coin, query) =>
     new Promise((resolve, reject) => {
       if (coin !== 'BTC') {
-        return reject(new ParameterInvalidError('Coin and Blockchain mismatched'));
+        return reject(new BadRequestError('Coin and Blockchain mismatched'));
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
@@ -108,7 +119,7 @@ class BitcoinAdapater {
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
-            return reject(new ParameterInvalidError('Invalid Currency'));
+            return reject(new BadRequestError('Invalid Currency'));
           }
           return resolve({ coin, [currency]: result[currency] })
         })
@@ -405,7 +416,12 @@ class BitcoinAdapater {
       const url = `${vaultBaseUrl}/api/address`;
       headers = { "x-vault-token": headers["x-vault-token"] };
       return postRequest(url, body, headers)
-        .then(res => resolve(res.data))
+        .then(res => {
+          if (_.includes(res.errors, 'missing client token')) {
+            return reject(new BadRequestError('x-vault-token is missing'));
+          }
+          return resolve(res.data);
+        })
         .catch(reject);
     });
 }
