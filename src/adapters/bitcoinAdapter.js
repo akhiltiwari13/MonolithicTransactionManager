@@ -135,53 +135,6 @@ class BitcoinAdapater {
         .catch(reject);
     });
 
-  _makeRawTransaction = async (senderAddress, balance, utxos, receiverAddress, estimateFee, sendAmount) => {
-    const blockchainNetworkBitcoinjsLib = envConfig.get('env') === 'production' ? networks.bitcoin : networks.testnet
-    const payload = { inputs: [], outputs: [] }
-    const tx = new TransactionBuilder(blockchainNetworkBitcoinjsLib)
-    const totalAmountToSend = new BigNumber(sendAmount).multipliedBy(100000000).toNumber();
-    let totalInput = 0
-    let totalUTXOEntered = 0
-    let i = 0
-    let bitcoinTransactionFee = (34 * 10) * (Math.round(estimateFee / 1000))
-    for (i = 0; i < utxos.length; i += 1) {
-      const currentUtxo = utxos[i]
-      totalInput = totalInput + parseInt(currentUtxo.satoshis, 10)
-      const txHashRaw = await this._getRawOfTxHash(currentUtxo.txid)
-      tx.addInput(currentUtxo.txid, currentUtxo.vout)
-      payload.inputs.push({ txhash: currentUtxo.txid, vout: currentUtxo.vout, txHashRaw: txHashRaw.rawtx })
-      bitcoinTransactionFee += (180 + 1) * (Math.round(estimateFee / 1000))
-      if (totalInput > totalAmountToSend + bitcoinTransactionFee) {
-        totalUTXOEntered = i
-        break
-      }
-    }
-    if (balance < totalAmountToSend + bitcoinTransactionFee) {
-      throw new BadRequestError('Insufficient Balance for Fee')
-    };
-    const amountToKeep = totalInput - (totalAmountToSend + bitcoinTransactionFee);
-    payload.outputs.push({ address: receiverAddress, amount: totalAmountToSend });
-    tx.addOutput(receiverAddress, totalAmountToSend);
-    tx.addOutput(senderAddress, amountToKeep);
-    payload.outputs.push({ address: senderAddress, amount: parseInt(amountToKeep) })
-    const filterPayload = {
-      inputs: _.map(payload.inputs, (x) => _.omit(x, 'txHashRaw')),
-      outputs: payload.outputs
-    }
-    return { payload: filterPayload, rawtx: tx.buildIncomplete().toHex(), allPayloadData: payload, coinType: envConfig.get('env') === 'production' ? 0 : 1 }
-  };
-
-  _broadcastTx = signedTx =>
-    new Promise((resolve, reject) => {
-      const body = {
-        rawtx: signedTx
-      }
-      const url = `${btcBaseUrl}/tx/send`;
-      return postRequest(url, body)
-        .then(resolve)
-        .catch(reject)
-    })
-
   _getUuid = async (accountName) => {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
@@ -189,64 +142,6 @@ class BitcoinAdapater {
     if (!registrar) return false;
     return registrar.vault_uuid;
   }
-
-  _getSignature = (txPayload, senderName) =>
-    new Promise(async (resolve, reject) => {
-      const url = `${vaultBaseUrl}/api/signature`;
-      const senderUuid = await this._getUuid(senderName);
-      const coinId = envConfig.get('env') === 'development' ? 1 : 0;
-      const body = {
-        coinType: coinId,
-        path: `m/44'/${coinId}'/0'/0/0`,
-        payload: JSON.stringify(txPayload),
-        uuid: senderUuid
-      };
-      const headers = {
-        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
-        "Content-Type": "application/json"
-      };
-      return postRequest(url, body, headers)
-        .then(res => resolve(res.data.signature))
-        .catch(reject);
-    });
-
-  _getRawOfTxHash = txId =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/rawtx/${txId}`;
-      return getRequest(url)
-        .then(resolve)
-        .catch(reject)
-    });
-
-  _getUtxo = address =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/addr/${address}/utxo`;
-      return getRequest(url)
-        .then(resolve)
-        .catch(reject)
-    });
-
-  _estimateFee = () =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/utils/estimatefee`;
-      return getRequest(url)
-        .then(fee => {
-          const feeInSatoshis = new BigNumber(fee['2']).multipliedBy(100000000).toNumber();
-          return resolve(feeInSatoshis)
-        })
-        .catch(reject)
-    });
-
-  _getBalance = address =>
-    new Promise((resolve, reject) => {
-      const url = `${btcBaseUrl}/addr/${address}/balance`;
-      return getRequest(url)
-        .then(result => {
-          const balance = new BigNumber(result).toNumber();
-          return resolve(balance);
-        })
-        .catch(reject)
-    })
 
   _makeRawTransaction = async (senderAddress, balance, utxos, receiverAddress, estimateFee, sendAmount) => {
     const blockchainNetworkBitcoinjsLib = envConfig.get('env') === 'production' ? networks.bitcoin : networks.testnet
