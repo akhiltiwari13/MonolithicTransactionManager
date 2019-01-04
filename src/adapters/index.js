@@ -1,11 +1,12 @@
 import BitcoinAdapter from './bitcoinAdapter';
 import BitsharesAdapter from './bitsharesAdapter';
 import EthereumAdapter from './ethereumAdapter';
+import { BadRequestError } from '../errors';
 
 export const getBlockchain = (blockchain) => {
   switch (blockchain) {
-    // case 'BTC':
-    //   return new BitcoinAdapter();
+    case 'BTC':
+      return new BitcoinAdapter();
     case 'ETH':
       return new EthereumAdapter();
     case 'BTS':
@@ -15,4 +16,4 @@ export const getBlockchain = (blockchain) => {
   }
 }
 
-export { BitsharesAdapter, EthereumAdapter };
+export { BitsharesAdapter, EthereumAdapter, BitcoinAdapter };

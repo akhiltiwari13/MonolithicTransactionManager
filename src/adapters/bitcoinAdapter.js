@@ -40,10 +40,9 @@ class BitcoinAdapater {
         .then(result => {
           const address = result.address;
           const url = `${btcBaseUrl}/addr/${address}/balance`;
-          return getRequest(url)
-            .then(balance => resolve({ accountName, balance: balance / 100000000, unit: 'BTC' }))
-            .catch(reject)
+          return getRequest(url);
         })
+        .then(balance => resolve({ accountName, balance: balance / 100000000, unit: 'BTC' }))
         .catch(reject)
     });
 

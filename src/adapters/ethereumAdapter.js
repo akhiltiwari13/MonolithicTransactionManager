@@ -6,7 +6,6 @@ import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors';
 import request from "request"; // for the socket hang up error
 
-
 /* required constants for ethereum adapter */
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
@@ -16,7 +15,6 @@ const ethChainId = 3; // 1 for mainnet and 3 for testnet
 const etherscanApiURL = envConfig.get("ethscanBaseUrl")
 const etherscanApiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
 const ethereumNodeURL = envConfig.get("ethBaseUrl")
-
 
 if (typeof web3 !== 'undefined') {
   var web3 = new Web3(web3.currentProvider);
@@ -53,16 +51,16 @@ class EthereumAdapter {
         .catch(reject);
     });
 
-
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const uuid = await this._getUuid(accountName);
+      if (!uuid) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
       return this._getAddress(headers, uuid)
         .then(res => {
-          return res;
-        })
-        .then(res => {
-          return resolve(web3.eth.getBalance(res));
+          const balance = web3.eth.getBalance(res);
+          return resolve({ accountName, balance, unit: 'ETH' }); 
         })
         .catch(reject)
     })
@@ -179,6 +177,7 @@ class EthereumAdapter {
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
     const registrar = await UserRepository.findOne({ name: account });
+    if (!registrar) return false;
     return registrar.vault_uuid;
   }
 
