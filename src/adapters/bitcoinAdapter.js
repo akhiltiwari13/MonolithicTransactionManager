@@ -2,11 +2,11 @@ import { getRequest, postRequest } from "../lib/request";
 import envConfig from "../../config/envConfig";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
-import { BigNumber } from 'bignumber.js'
+import { BigNumber } from 'bignumber.js';
 import { Transfer } from "../entity/transfer";
 import { TransactionBuilder, networks } from 'bitcoinjs-lib';
 import _ from 'lodash';
-import { BadRequestError } from '../errors'
+import { BadRequestError } from '../errors';
 
 const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
