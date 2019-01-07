@@ -132,18 +132,21 @@ class EthereumAdapter {
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const uuid = await this._getUuid(accountName);
+      if (!uuid) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
       return this._getAddress(headers, uuid)
         .then(address => {
           //  setting startBlockNumber and endBlockNumber 
           var endBlockNumber = web3.eth.blockNumber;
           var startBlockNumber = 0;
           const url = `${etherscanApiURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${etherscanApiKey}`;
-          request.get(url, (error, response, body) => { // using getRequest from lib gives "socket hang up" exception.
+          return request.get(url, (error, response, body) => { // using getRequest from lib gives "socket hang up" exception.
             if (error) {
-              return error
+              return reject(error);
             }
-            return resolve(JSON.parse(body))
-          })
+            return resolve(JSON.parse(body));
+          });
         })
         .catch(reject)
     })
