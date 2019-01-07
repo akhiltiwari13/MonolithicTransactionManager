@@ -7,6 +7,7 @@ import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors'
+import _ from 'lodash';
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -45,6 +46,9 @@ class BitsharesAdapter {
     new Promise((resolve, reject) => {
       if (!req.body.name) {
         return reject(new BadRequestError('Account name is required'));
+      }
+      if (req.body.name !== _.toLower(req.body.name)) {
+        return reject(new BadRequestError('Account name must not contain upper case character'));
       }
       let userUuidVault, publicKey, chainId;
       return this._registerUserToVault(req)
