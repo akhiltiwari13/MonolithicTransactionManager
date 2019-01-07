@@ -27,30 +27,6 @@ class EthereumAdapter {
     this.name = name;
   }
 
-  createAccount = req =>
-    new Promise((resolve, reject) => {
-      let userUuidVault;
-      return this._registerUserToVault(req)
-        .then(result => {
-          userUuidVault = result.data.uuid;
-          return userUuidVault;
-        })
-        .then(res => {
-          const connection = getConnection();
-          const user = new User();
-          let accountName = req.body.name;
-          user.name = accountName;
-          user.vault_uuid = userUuidVault;
-          user.bts_publickey = "";
-          connection.manager
-            .save(user)
-            .then(() => resolve(res[0].id))
-            .catch(reject);
-          return resolve({ uuid: userUuidVault, name: user.name });
-        })
-        .catch(reject);
-    });
-
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const uuid = await this._getUuid(accountName);
