@@ -17,7 +17,7 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getBalance = (headers , accountName) => // headers required for other adapters.
+  getBalance = (headers, accountName) => // headers required for other adapters.
     new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
@@ -57,7 +57,7 @@ class BitsharesAdapter {
           let registrarAccount = "nathan";
           let accountName = req.body.name;
           publicKey = pubKey;
-          Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL
+          Apis.instance("ws://0.tcp.ngrok.io:12406/", true) // TODO: Replace URL
             .init_promise.then(res => {
               chainId = res[0].network.chain_id;
               return ChainStore.init();
@@ -143,7 +143,7 @@ class BitsharesAdapter {
         asset: "BTS"
       };
       let tr = new TransactionBuilder();
-      Apis.instance("ws://192.168.10.81:11011", true)
+      Apis.instance("ws://0.tcp.ngrok.io:12406/", true)
         .init_promise.then(res => {
           chainId = res[0].network.chain_id;
           return ChainStore.init();
