@@ -36,7 +36,7 @@ class EthereumAdapter {
       return this._getAddress(headers, uuid)
         .then(res => {
           const balance = web3.eth.getBalance(res);
-          return resolve({ accountName, balance, unit: 'ETH' }); 
+          return resolve({ accountName, balance, unit: 'ETH' });
         })
         .catch(reject)
     })
@@ -61,9 +61,17 @@ class EthereumAdapter {
       }
     });
 
-
   transfer = req =>
     new Promise(async (resolve, reject) => {
+      if (!req.body.fromAccount) {
+        return reject(new BadRequestError('fromAccount is mandatory'));
+      }
+      if (!req.body.toAccount) {
+        return reject(new BadRequestError('toAccount is mandatory'));
+      }
+      if (!req.body.sendAmount) {
+        return reject(new BadRequestError('sendAmount is mandatory'));
+      }
       const fromAccountUUID = await this._getUuid(req.body.fromAccount);
       const toAccountUUID = await this._getUuid(req.body.toAccount);
       const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID);
@@ -103,7 +111,6 @@ class EthereumAdapter {
         })
         .catch(reject);
     });
-
 
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
