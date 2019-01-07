@@ -17,7 +17,7 @@ class BitsharesAdapter {
     this.name = name;
   }
 
-  getBalance = (headers , accountName) => // headers required for other adapters.
+  getBalance = (headers, accountName) => // headers required for other adapters.
     new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
@@ -50,79 +50,88 @@ class BitsharesAdapter {
       return this._registerUserToVault(req)
         .then(result => {
           userUuidVault = result.data.uuid;
-          return this._getPublicKey(req, userUuidVault);
+          return this._getPublicKey(req, userUuidVault)
+            .then(pubKey => {
+              let tr = new TransactionBuilder();
+              let registrarAccount = "nathan";
+              let accountName = req.body.name;
+              publicKey = pubKey;
+              Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL
+                .init_promise.then(res => {
+                  chainId = res[0].network.chain_id;
+                  return ChainStore.init()
+                    .then(() => Promise.all([FetchChain("getAccount", registrarAccount)])
+                      .then(res => {
+                        let [registrarAccount] = res;
+
+                        /* Account Create */
+                        tr.add_type_operation("account_create", {
+                          referrer_percent: 0,
+                          registrar: registrarAccount.get("id"),
+                          referrer: registrarAccount.get("id"),
+                          name: `hwd${accountName}`,
+                          owner: {
+                            weight_threshold: 1,
+                            account_auths: [],
+                            key_auths: [[publicKey, 1]],
+                            address_auths: []
+                          },
+                          active: {
+                            weight_threshold: 1,
+                            account_auths: [],
+                            key_auths: [[publicKey, 1]],
+                            address_auths: []
+                          },
+                          options: {
+                            memo_key: publicKey,
+                            voting_account: "1.2.5",
+                            num_witness: 0,
+                            num_committee: 0,
+                            votes: [],
+                            extensions: []
+                          }
+                        });
+                        /* Account Create */
+
+                        tr.set_required_fees()
+                          .then(() => tr.finalize()
+                            .then(() => {
+                              const tr_buff = Buffer.concat([
+                                new Buffer(chainId, "hex"),
+                                tr.tr_buffer
+                              ]);
+                              const trBuff = tr_buff.toString("hex");
+                              return this._getSignature(req, trBuff, registrarAccount)
+                                .then(sign => {
+                                  tr.signatures.push(sign);
+                                  return tr.broadcast()
+                                    .then(res => {
+                                      const connection = getConnection();
+                                      const user = new User();
+                                      user.name = accountName;
+                                      user.vault_uuid = userUuidVault;
+                                      return connection.manager.save(user)
+                                        .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
+                                        .catch(err => reject(new BadRequestError('Error while saving account to database')));
+                                    })
+                                    .catch(error => reject(new BadRequestError('Error in broadcasting account creation transaction')));
+                                })
+                                .catch(error => reject(new BadRequestError('Error in signing account creation transaction')));
+                            })
+                            .catch(error => reject(new BadRequestError('Error in finalizing account creation transaction')))
+                          )
+                          .catch(error => reject(new BadRequestError('Error in setting fees for account creation transaction')))
+                      })
+                      .catch(error => reject(new BadRequestError('Error in fetching chain')))
+                    )
+                    .catch(error => reject(new BadRequestError('Error in initiating chain store')));
+                })
+                .catch(error => reject(new BadRequestError('Error in APIs instance')));
+            })
+            .catch(error => reject(new BadRequestError('Error in getting public key')));
         })
-        .then(pubKey => {
-          let tr = new TransactionBuilder();
-          let registrarAccount = "nathan";
-          let accountName = req.body.name;
-          publicKey = pubKey;
-          Apis.instance("ws://192.168.10.81:11011", true) // TODO: Replace URL
-            .init_promise.then(res => {
-              chainId = res[0].network.chain_id;
-              return ChainStore.init();
-            })
-            .then(() => Promise.all([FetchChain("getAccount", registrarAccount)]))
-            .then(res => {
-              let [registrarAccount] = res;
-
-              /* Account Create */
-              tr.add_type_operation("account_create", {
-                referrer_percent: 0,
-                registrar: registrarAccount.get("id"),
-                referrer: registrarAccount.get("id"),
-                name: `hwd${accountName}`,
-                owner: {
-                  weight_threshold: 1,
-                  account_auths: [],
-                  key_auths: [[publicKey, 1]],
-                  address_auths: []
-                },
-                active: {
-                  weight_threshold: 1,
-                  account_auths: [],
-                  key_auths: [[publicKey, 1]],
-                  address_auths: []
-                },
-                options: {
-                  memo_key: publicKey,
-                  voting_account: "1.2.5",
-                  num_witness: 0,
-                  num_committee: 0,
-                  votes: [],
-                  extensions: []
-                }
-              });
-              /* Account Create */
-
-              tr.set_required_fees();
-            })
-            .then(() => tr.finalize())
-            .then(() => {
-              const tr_buff = Buffer.concat([
-                new Buffer(chainId, "hex"),
-                tr.tr_buffer
-              ]);
-              const trBuff = tr_buff.toString("hex");
-              return this._getSignature(req, trBuff, registrarAccount);
-            })
-            .then(sign => {
-              tr.signatures.push(sign);
-              return tr.broadcast();
-            })
-            .then(res => {
-              const connection = getConnection();
-              const user = new User();
-              user.name = accountName;
-              user.vault_uuid = userUuidVault;
-              return connection.manager.save(user)
-            })
-            .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
-            .catch(err => reject(new BadRequestError('Error in account creation')));
-        })
-        .catch(error => reject(new BadRequestError('Error while registering account to vault')));
-    });
-
+        .catch(error => reject(new BadRequestError('Error in registering user to vault')));
+    })
   transfer = req =>
     new Promise((resolve, reject) => {
       if (!req.body.fromAccount) {
