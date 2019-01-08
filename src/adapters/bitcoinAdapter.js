@@ -42,7 +42,7 @@ class BitcoinAdapater {
           const url = `${btcBaseUrl}/addr/${address}/balance`;
           return getRequest(url);
         })
-        .then(balance => resolve({ accountName, balance: balance / 100000000, unit: 'BTC' }))
+        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000000), unit: 'BTC' }))
         .catch(reject)
     });
 
@@ -107,7 +107,7 @@ class BitcoinAdapater {
           transfer.txn_id = res.txid;
           transfer.from = senderAccountName;
           transfer.to = receiverAccountName;
-          transfer.amount = sendAmount * 100000000;
+          transfer.amount = new BigNumber(sendAmount).multipliedBy(100000000).toNumber();
           transfer.coin_id = 'BTC';
           transfer.txn_status = 'PENDING';
           return connection.manager.save(transfer);
