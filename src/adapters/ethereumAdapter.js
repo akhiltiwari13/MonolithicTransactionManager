@@ -134,6 +134,17 @@ class EthereumAdapter {
         .catch(reject)
     })
 
+  getStatus = (blockchain, txnId) =>
+    new Promise(async (resolve, reject) => {
+      const connection = getConnection();
+      const TransferRepository = connection.getRepository(Transfer);
+      const transaction = await TransferRepository.findOne({ txn_id: txnId, coin_id: blockchain });
+      if (!transaction) {
+        return reject(new BadRequestError('Transaction does not exists'));
+      }
+      return resolve(transaction.txn_status);
+    })
+
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
