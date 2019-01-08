@@ -182,9 +182,7 @@ class EthereumAdapter {
     return nounce;
   }
 
-  _getWeiFromEth = async (amount) => {
-    return web3.toWei(amount, 'ether');
-  }
+  _getWeiFromEth = async (amount) => web3.toWei(amount, 'ether')
 
   _signTransaction = (payload, fromAccountUUID) =>
     new Promise(async (resolve, reject) => {
@@ -200,9 +198,7 @@ class EthereumAdapter {
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)
-        .then(res => {
-          return resolve(res.data);
-        })
+        .then(res => resolve(res.data))
         .catch(reject);
     });
 }
