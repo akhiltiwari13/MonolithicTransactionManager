@@ -100,12 +100,19 @@ const schema = {
     env: "VAULT_BASE_URL",
     arg: "vault_base_url"
   },
-  ethBaseUrl: {
+  ethTestBaseUrl: {
     doc: "Contains baseUrl for ETH testnet node, which this service connects to",
     format: String,
     default: "https://ropsten.infura.io/v3/90bfb15e855e41a8997b24d5f7a170e1",
-    env: "ETH_BASE_URL",
-    arg: "eth_base_url"
+    env: "ETH_TEST_BASE_URL",
+    arg: "eth_test_base_url"
+  },
+  ethMainBaseUrl: {
+    doc: "Contains baseUrl for ETH mainnet node, which this service connects to",
+    format: String,
+    default: "https://mainnet.infura.io/v3/90bfb15e855e41a8997b24d5f7a170e1",
+    env: "ETH_MAIN_BASE_URL",
+    arg: "eth_main_base_url"
   },
   ethscanTestBaseUrl: {
     doc: "Contains ropsten baseUrl for etherScan api, which is used in fetching transaction history",
@@ -115,7 +122,7 @@ const schema = {
     arg: "ethscan_test_base_url"
   },
   ethscanMainBaseUrl: {
-    doc: "Contains baseUrl for etherScan api, which is used in fetching transaction history",
+    doc: "Contains mainnet baseUrl for etherScan api, which is used in fetching transaction history",
     format: String,
     default: "http://api.etherscan.io/api",
     env: "ETHSCAN_MAIN_BASE_URL",
