@@ -6,7 +6,8 @@ import async from 'async';
 import Web3 from 'web3'; // to get web3 to work.
 import envConfig from "../../config/envConfig";
 
-const ethereumNodeURL = envConfig.get("ethBaseUrl")
+const ethEnvironment = envConfig.get('env');
+const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
 
 if (typeof web3 !== 'undefined') {
   var web3 = new Web3(web3.currentProvider);
