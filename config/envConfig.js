@@ -107,12 +107,19 @@ const schema = {
     env: "ETH_BASE_URL",
     arg: "eth_base_url"
   },
-  ethscanBaseUrl: {
-    doc: "Contains baseUrl for etherScan api, which is used in fetching transaction history",
+  ethscanTestBaseUrl: {
+    doc: "Contains ropsten baseUrl for etherScan api, which is used in fetching transaction history",
     format: String,
     default: "http://ropsten.etherscan.io/api",
-    env: "ETHSCN_BASE_URL",
-    arg: "ethscn_base_url"
+    env: "ETHSCAN_TEST_BASE_URL",
+    arg: "ethscan_test_base_url"
+  },
+  ethscanMainBaseUrl: {
+    doc: "Contains baseUrl for etherScan api, which is used in fetching transaction history",
+    format: String,
+    default: "http://api.etherscan.io/api",
+    env: "ETHSCAN_MAIN_BASE_URL",
+    arg: "ethscan_main_base_url"
   },
 };
 

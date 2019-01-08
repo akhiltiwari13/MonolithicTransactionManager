@@ -12,8 +12,8 @@ const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const Web3 = require('web3') // to get web3 to work.
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = 3; // 1 for mainnet and 3 for testnet
-const etherscanApiURL = envConfig.get("ethscanBaseUrl")
-const etherscanApiKey = "JCJV1J6TNHT2G6VMMEBUVQE4N8VEV7M2I3";
+const etherscanApiURL = envConfig.get("ethscanTestBaseUrl")
+const etherscanApiKey = "HS7YPE9QMBP7CMPD2PK7I9RDN1NGZJAH5Y";
 const ethereumNodeURL = envConfig.get("ethBaseUrl")
 
 if (typeof web3 !== 'undefined') {
