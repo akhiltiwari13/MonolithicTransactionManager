@@ -22,7 +22,6 @@
     "babel-register": "^6.26.0",
     "bignumber.js": "^8.0.1",
     "bitcoinjs-lib": "^4.0.2",
-    "bignumber": "^1.1.0",
     "bitsharesjs": "github:ankit21gupta/bitsharesjs",
     "bitsharesjs-ws": "github:ankit21gupta/bitsharesjs-ws",
     "bluebird": "^3.5.3",
