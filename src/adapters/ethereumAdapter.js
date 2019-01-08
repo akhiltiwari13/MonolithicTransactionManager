@@ -4,17 +4,20 @@ import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors';
+import BigNumber from 'bignumber.js';
+import Web3 from 'web3'; // to get web3 to work.
 import request from "request"; // for the socket hang up error
 
 /* required constants for ethereum adapter */
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
+const ethEnvironment = envConfig.get('env');
+const etherscanApiURL = ethEnvironment === 'development' ? envConfig.get('ethscanTestBaseUrl') : envConfig.get('ethscanMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
-const Web3 = require('web3') // to get web3 to work.
 const priceBaseUrl = envConfig.get("priceBaseUrl");
-const ethChainId = 3; // 1 for mainnet and 3 for testnet
-const etherscanApiURL = envConfig.get("ethscanTestBaseUrl")
+const ethChainId = ethEnvironment === 'development' ? 3 : 1; // 1 for mainnet and 3 for testnet
 const etherscanApiKey = "HS7YPE9QMBP7CMPD2PK7I9RDN1NGZJAH5Y";
-const ethereumNodeURL = envConfig.get("ethBaseUrl")
+// const ethereumNodeURL = envConfig.get("ethBaseUrl");
+const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
 
 if (typeof web3 !== 'undefined') {
   var web3 = new Web3(web3.currentProvider);
@@ -36,7 +39,7 @@ class EthereumAdapter {
       return this._getAddress(headers, uuid)
         .then(res => {
           const balance = web3.eth.getBalance(res);
-          return resolve({ accountName, balance, unit: 'ETH' });
+          return resolve({ accountName, balance: new BigNumber(parseInt(balance, 10)).div(1000000000000000000), unit: 'ETH' });
         })
         .catch(reject)
     })
@@ -101,7 +104,7 @@ class EthereumAdapter {
           transfer.txn_id = res;
           transfer.from = req.body.fromAccount;
           transfer.to = req.body.toAccount;
-          transfer.amount = req.body.sendAmount;
+          transfer.amount = new BigNumber(req.body.sendAmount).multipliedBy(1000000000000000000).toNumber();
           transfer.coin_id = 'ETH';
           transfer.txn_status = 'PENDING';
           connection.manager
@@ -205,7 +208,7 @@ class EthereumAdapter {
         "uuid": fromAccountUUID
       }
       const headers = {  // needs to be passed as parameters instead...
-        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
+        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s", // need to avoid hardcode
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)
