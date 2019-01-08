@@ -7,6 +7,7 @@ import { getConnection } from "typeorm";
 import { User } from "../entity/user";
 import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors'
+import BigNumber from 'bignumber.js';;
 import _ from 'lodash';
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
@@ -22,7 +23,7 @@ class BitsharesAdapter {
     new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
-        .then(balance => resolve({ accountName, balance: balance / 100000, unit: "BTS" }))
+        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000), unit: "BTS" }))
         .catch(reject))
 
   getTransactionHistory = (headers, accountName) =>
@@ -141,7 +142,7 @@ class BitsharesAdapter {
       let chainId;
       const fromAccount = req.body.fromAccount;
       const toAccount = req.body.toAccount;
-      const amount = req.body.sendAmount * 100000;
+      const amount = new BigNumber(req.body.sendAmount).multipliedBy(100000).toNumber();
       const sendAmount = {
         amount,
         asset: "BTS"
