@@ -1,15 +1,15 @@
 require("babel-register");
 require("babel-polyfill");
 
-// import envConfig from "./config/envConfig";
+import envConfig from "./config/envConfig";
 
 module.exports = {
   type: "postgres",
-  host: "localhost", //envConfig.get("db.host"),
-  port: 5432, //envConfig.get("db.port"),
-  username: "postgres", //envConfig.get("db.username"),
-  password: "qwertyuiop", //envConfig.get("db.password"),
-  database: "testing", //envConfig.get("db.database"),
+  host: envConfig.get("db.host"),
+  port: envConfig.get("db.port"),
+  username: envConfig.get("db.username"),
+  password: envConfig.get("db.password"),
+  database: envConfig.get("db.database"),
   logging: false,
   synchronize: false,
   migrationsRun: true,
