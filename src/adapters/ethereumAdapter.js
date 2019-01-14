@@ -39,7 +39,7 @@ class EthereumAdapter {
       return this._getAddress(headers, uuid)
         .then(res => {
           const balance = web3.eth.getBalance(res);
-          return resolve({ accountName, balance: new BigNumber(parseInt(balance, 10)).div(1000000000000000000), unit: 'ETH' });
+          return resolve({ accountName, balance: new BigNumber(parseInt(balance, 10)).div(1000000000000000000).toString(), unit: 'ETH' });
         })
         .catch(reject)
     })
@@ -107,11 +107,9 @@ class EthereumAdapter {
           transfer.amount = new BigNumber(req.body.sendAmount).multipliedBy(1000000000000000000).toNumber();
           transfer.coin_id = 'ETH';
           transfer.txn_status = 'PENDING';
-          connection.manager
-            .save(transfer)
-            .then(() => resolve(res))
-            .catch(reject);
+          return connection.manager.save(transfer)
         })
+        .then(txn => resolve({ TranscationId: txn.txn_id }))
         .catch(reject);
     });
 
