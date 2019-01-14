@@ -42,7 +42,7 @@ class BitcoinAdapater {
           const url = `${btcBaseUrl}/addr/${address}/balance`;
           return getRequest(url);
         })
-        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000000), unit: 'BTC' }))
+        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000000).toString(), unit: 'BTC' }))
         .catch(reject)
     });
 
@@ -112,7 +112,7 @@ class BitcoinAdapater {
           transfer.txn_status = 'PENDING';
           return connection.manager.save(transfer);
         })
-        .then(txn => resolve(txn.txn_id))
+        .then(txn => resolve({ TranscationId: txn.txn_id }))
         .catch(reject);
     })
 
@@ -193,6 +193,9 @@ class BitcoinAdapater {
     new Promise(async (resolve, reject) => {
       const url = `${vaultBaseUrl}/api/signature`;
       const senderUuid = await this._getUuid(senderName);
+      if (!senderUuid) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
       const coinId = envConfig.get('env') === 'development' ? 1 : 0;
       const body = {
         coinType: coinId,
@@ -259,6 +262,9 @@ class BitcoinAdapater {
   _getPublicAddress = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       const senderUuid = await this._getUuid(accountName);
+      if (!senderUuid) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
       const coinId = envConfig.get('env') === 'development' ? 1 : 0;
       const body = {
         coinType: coinId,
