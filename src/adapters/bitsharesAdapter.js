@@ -23,7 +23,7 @@ class BitsharesAdapter {
     new Promise((resolve, reject) =>
       this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
-        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000), unit: "BTS" }))
+        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000).toString(), unit: "BTS" }))
         .catch(reject))
 
   getTransactionHistory = (headers, accountName) =>
@@ -203,7 +203,7 @@ class BitsharesAdapter {
           transfer.txn_status = 'CONFIRMED';
           return connection.manager.save(transfer);
         })
-        .then(txn => resolve(txn.txn_id))
+        .then(txn => resolve({ TranscationId: txn.txn_id }))
         .catch(err => reject(new BadRequestError('Error in Transaction')));
     });
 
@@ -222,8 +222,7 @@ class BitsharesAdapter {
           }
           return resolve({ coin, [currency]: result[currency] })
         })
-        .then(txn => resolve(txn.txn_id))
-        .catch(err => reject(new ParameterInvalidError('Error in Transaction')));
+        .catch(reject);
     });
 
   _registerUserToVault = req =>
