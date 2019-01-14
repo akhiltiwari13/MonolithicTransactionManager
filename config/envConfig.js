@@ -38,6 +38,43 @@ const schema = {
       arg: "db_database"
     }
   },
+  test_db: {
+    host: {
+      doc: "Host for Database",
+      format: String,
+      default: "localhost",
+      env: "TEST_DB_HOST",
+      arg: "test_db_host"
+    },
+    port: {
+      doc: "Port for Database",
+      format: Number,
+      default: 5432,
+      env: "TEST_DB_PORT",
+      arg: "test_db_port"
+    },
+    username: {
+      doc: "Username for Database",
+      format: String,
+      default: 'postgres',
+      env: "TEST_DB_USERNAME",
+      arg: "test_db_username"
+    },
+    password: {
+      doc: "Password for Database",
+      format: String,
+      default: 'qwertyuiop',
+      env: "TEST_DB_PASSWORD",
+      arg: "test_db_password"
+    },
+    database: {
+      doc: "Name of Database",
+      format: String,
+      default: 'testing_db',
+      env: "TEST_DB_DATABASE",
+      arg: "test_db_database"
+    }
+  },
   app: {
     name: {
       doc: 'Howdoo Blockchain Service',
