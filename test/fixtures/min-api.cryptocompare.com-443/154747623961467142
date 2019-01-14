@@ -1,0 +1,21 @@
+GET /data/price?fsym=BTC&tsyms=invalid_currency
+host: min-api.cryptocompare.com
+accept: application/json
+content-type: application/json
+body: {}
+
+HTTP/1.1 200 OK
+server: nginx/1.10.3
+date: Mon, 14 Jan 2019 14:30:39 GMT
+content-type: application/json; charset=UTF-8
+transfer-encoding: chunked
+connection: close
+vary: Accept-Encoding
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, OPTIONS
+access-control-allow-headers: Content-Type, Cookie, Set-Cookie
+access-control-allow-credentials: true
+cache-control: public, max-age=0
+cryptocompare-cache-hit: false
+
+{"Response":"Error","Message":"There is no data for any of the toSymbols invalid_currency .","HasWarning":true,"Type":2,"RateLimit":{},"Data":{},"Warning":"There is no data for the toSymbol/s invalid_currency ","ParamWithError":"tsyms"}

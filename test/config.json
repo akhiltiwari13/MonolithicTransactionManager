@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s"
+  },
+  "btcReq": {
+    "body": {
+      "fromAccount": "random01",
+      "toAccount": "random02",
+      "sendAmount": 0.0001
+    },
+    "headers": {
+      "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s"
+    }
+  },
+  "btcQuery": {
+    "currency": "INR"
+  }
+}

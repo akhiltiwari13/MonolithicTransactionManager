@@ -1,0 +1,29 @@
+GET /api/addr/mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL/balance
+host: test-insight.bitpay.com
+accept: application/json
+content-type: application/json
+body: {}
+
+HTTP/1.1 200 OK
+date: Mon, 14 Jan 2019 14:30:26 GMT
+content-type: application/json; charset=utf-8
+content-length: 8
+connection: close
+set-cookie: __cfduid=d94bd4264a531a0d19969fa86450229ac1547476225; expires=Tue, 14-Jan-20 14:30:25 GMT; path=/; domain=.bitpay.com; HttpOnly
+x-powered-by: Express
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 59
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, PUT, POST, OPTIONS
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Content-Length, Cache-Control, cf-connecting-ip
+cache-control: public, max-age=30
+x-content-type-options: nosniff
+etag: W/"8-C01PhnmDnnlUu2pdXEp6UA"
+vary: Accept-Encoding
+cf-cache-status: EXPIRED
+accept-ranges: bytes
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 4990cceb6e0b887e-BOM
+
+15121961
