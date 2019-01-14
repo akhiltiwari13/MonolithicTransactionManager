@@ -13,7 +13,7 @@ export default class UserController {
     const accountName = req.params.userId;
     return req.adapter
       .getTransactionHistory(accountName)
-      .then(balanceObject => Responder.success(res, balanceObject))
+      .then(result => Responder.success(res, result))
       .catch(error => Responder.operationFailed(res, error));
   };
 

@@ -20,9 +20,9 @@ const start = async () => {
   try {
     await connectDB();
   } catch (err) {
-    console.error("<===== Error while connecting DB =====>");
-    console.error(err);
-    console.error("<===== Exiting the process =====>");
+    logger.error("<===== Error while connecting DB =====>");
+    logger.error(err);
+    logger.error("<===== Exiting the process =====>");
     process.exit(1);
   }
 
