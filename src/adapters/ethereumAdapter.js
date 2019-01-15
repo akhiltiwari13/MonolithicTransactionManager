@@ -16,7 +16,6 @@ const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = ethEnvironment === 'development' ? 3 : 1; // 1 for mainnet and 3 for testnet
 const etherscanApiKey = "HS7YPE9QMBP7CMPD2PK7I9RDN1NGZJAH5Y";
-// const ethereumNodeURL = envConfig.get("ethBaseUrl");
 const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
 
 if (typeof web3 !== 'undefined') {
