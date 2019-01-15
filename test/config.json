@@ -14,5 +14,39 @@
   },
   "btcQuery": {
     "currency": "INR"
+  },
+  "btsReq": {
+    "body": {
+      "fromAccount": "random01",
+      "toAccount": "random02",
+      "sendAmount": 40
+    },
+    "headers": {
+      "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s"
+    }
+  },
+  "btsQuery": {
+    "currency": "INR"
+  },
+  "btsAccountCreation": {
+    "body": {
+      "name": "unit_test_name"
+    },
+    "headers": {
+      "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s"
+    }
+  },
+  "ethReq": {
+    "body": {
+      "fromAccount": "random01",
+      "toAccount": "random02",
+      "sendAmount": 0.01
+    },
+    "headers": {
+      "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s"
+    }
+  },
+  "ethQuery": {
+    "currency": "INR"
   }
 }

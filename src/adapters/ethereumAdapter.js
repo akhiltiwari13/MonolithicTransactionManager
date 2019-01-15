@@ -75,7 +75,13 @@ class EthereumAdapter {
         return reject(new BadRequestError('sendAmount is mandatory'));
       }
       const fromAccountUUID = await this._getUuid(req.body.fromAccount);
+      if (!fromAccountUUID) {
+        return reject(new BadRequestError('sender account does not exists'));
+      }
       const toAccountUUID = await this._getUuid(req.body.toAccount);
+      if (!toAccountUUID) {
+        return reject(new BadRequestError('receiver account does not exists'));
+      }
       const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID);
       const toAccountAddress = await this._getAddress(req.headers, toAccountUUID);
       const gasPrice = await this._getGasPrice();

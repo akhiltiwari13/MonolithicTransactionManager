@@ -1,0 +1,15 @@
+POST /v1/api/signature
+x-vault-token: 5oPMP8ATL719MCtwZ1xN0r5s
+content-type: application/json
+host: 0.tcp.ngrok.io:12088
+accept: application/json
+body: {\"coinType\":60,\"path\":\"m/44\'/60\'/0\'/0/0\",\"payload\":\"{\\\"nonce\\\":4,\\\"value\\\":10000000000000000,\\\"gasLimit\\\":21000,\\\"gasPrice\\\":1500000000,\\\"to\\\":\\\"0x46aaaDCA2EdB5B20745e12419AF1fD6c3ed14aD3\\\",\\\"data\\\":\\\"\\\",\\\"chainId\\\":3}\",\"uuid\":\"bgrjat5gouhsbrsopbs0\"}
+
+HTTP/1.1 200 OK
+cache-control: no-store
+content-type: application/json
+date: Tue, 15 Jan 2019 11:27:57 GMT
+content-length: 392
+connection: close
+
+{"request_id":"3d54927d-0f71-15c0-c660-a99a46e8ffa2","lease_id":"","renewable":false,"lease_duration":0,"data":{"signature":"0xf86a048459682f008252089446aaadca2edb5b20745e12419af1fd6c3ed14ad3872386f26fc10000802aa047be162cfc7a218c0f6dcdfcb0226bc8a53884bb1b542b1c756a3072626b51d9a0385c9ff87808f1f077fbaf97124a8e46f5443f82cabdfa410cc0c687cbee9060"},"wrap_info":null,"warnings":null,"auth":null}

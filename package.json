@@ -4,7 +4,7 @@
   "description": "BTS, BTC, ETH blockchain utilities for Howdoo",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --timeout 200000 ",
     "start": "node server.js"
   },
   "repository": {

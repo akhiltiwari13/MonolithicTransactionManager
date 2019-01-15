@@ -1,4 +1,4 @@
-GET /data/price?fsym=BTC&tsyms=USD
+GET /data/price?fsym=BTS&tsyms=INR
 host: min-api.cryptocompare.com
 accept: application/json
 content-type: application/json
@@ -6,7 +6,7 @@ body: {}
 
 HTTP/1.1 200 OK
 server: nginx/1.4.6 (Ubuntu)
-date: Mon, 14 Jan 2019 14:30:41 GMT
+date: Tue, 15 Jan 2019 11:25:58 GMT
 content-type: application/json; charset=UTF-8
 transfer-encoding: chunked
 connection: close
@@ -16,6 +16,6 @@ access-control-allow-methods: GET, POST, OPTIONS
 access-control-allow-headers: Content-Type, Cookie, Set-Cookie
 access-control-allow-credentials: true
 cache-control: public, max-age=10
-cryptocompare-cache-hit: true
+cryptocompare-cache-hit: false
 
-{"USD":3574.16}
+{"INR":8.02}

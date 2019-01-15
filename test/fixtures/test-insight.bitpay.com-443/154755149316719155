@@ -1,28 +1,29 @@
-GET /api/utils/estimatefee
+GET /api/addr/mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL/balance
 host: test-insight.bitpay.com
 accept: application/json
 content-type: application/json
 body: {}
 
 HTTP/1.1 200 OK
-date: Mon, 14 Jan 2019 14:30:29 GMT
+date: Tue, 15 Jan 2019 11:24:53 GMT
 content-type: application/json; charset=utf-8
-content-length: 16
+content-length: 8
 connection: close
-set-cookie: __cfduid=d42b517a339b1645cfdadbca7a8f5be001547476229; expires=Tue, 14-Jan-20 14:30:29 GMT; path=/; domain=.bitpay.com; HttpOnly
+set-cookie: __cfduid=d78d9b1c29ee9f97d594cfd6f61bb72ed1547551491; expires=Wed, 15-Jan-20 11:24:51 GMT; path=/; domain=.bitpay.com; HttpOnly
 x-powered-by: Express
 x-ratelimit-limit: 60
 x-ratelimit-remaining: 59
 access-control-allow-origin: *
 access-control-allow-methods: GET, HEAD, PUT, POST, OPTIONS
 access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Content-Length, Cache-Control, cf-connecting-ip
+cache-control: public, max-age=30
 x-content-type-options: nosniff
-etag: W/"10-z15DX1hFnG9N8maZ4CBX7w"
+etag: W/"8-CfS5/zOv+AvBLCLDZdYpfA"
 vary: Accept-Encoding
-cf-cache-status: HIT
+cf-cache-status: EXPIRED
 accept-ranges: bytes
 expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
 server: cloudflare
-cf-ray: 4990cd024b2788ae-BOM
+cf-ray: 4997fa78da348a55-BOM
 
-{"2":0.00001019}
+15111702

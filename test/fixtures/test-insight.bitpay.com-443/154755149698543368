@@ -1,0 +1,29 @@
+GET /api/addr/mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL/utxo
+host: test-insight.bitpay.com
+accept: application/json
+content-type: application/json
+body: {}
+
+HTTP/1.1 200 OK
+date: Tue, 15 Jan 2019 11:24:56 GMT
+content-type: application/json; charset=utf-8
+content-length: 545
+connection: close
+set-cookie: __cfduid=d94e787f35437fb61590a69bfd02ab77f1547551495; expires=Wed, 15-Jan-20 11:24:55 GMT; path=/; domain=.bitpay.com; HttpOnly
+x-powered-by: Express
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 57
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, PUT, POST, OPTIONS
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Content-Length, Cache-Control, cf-connecting-ip
+cache-control: public, max-age=30
+x-content-type-options: nosniff
+etag: W/"221-93fwzAYegzTmqAeqtdCUig"
+vary: Accept-Encoding
+cf-cache-status: EXPIRED
+accept-ranges: bytes
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 4997fa90e8f08a6d-BOM
+
+[{"address":"mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL","txid":"292d693b7cc43e47424be30d817986a615586bbd217078207aa635c3301603fd","vout":1,"scriptPubKey":"76a91404e301511ce64912b1cfff156f8b1b8744d560bd88ac","amount":0.15001443,"satoshis":15001443,"confirmations":0,"ts":1547551240},{"address":"mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL","txid":"cc3be56ae8cf78485216bcc0b192fc9e178565384aa2970b4f067ad16a2b96fb","vout":0,"scriptPubKey":"76a91404e301511ce64912b1cfff156f8b1b8744d560bd88ac","amount":0.001,"satoshis":100000,"height":1452376,"confirmations":151}]

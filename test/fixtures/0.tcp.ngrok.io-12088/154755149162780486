@@ -1,0 +1,15 @@
+POST /v1/api/address
+x-vault-token: 5oPMP8ATL719MCtwZ1xN0r5s
+host: 0.tcp.ngrok.io:12088
+accept: application/json
+content-type: application/json
+body: {\"coinType\":1,\"path\":\"m/44\'/1\'/0\'/0/0\",\"uuid\":\"bgrjat5gouhsbrsopbs0\"}
+
+HTTP/1.1 200 OK
+cache-control: no-store
+content-type: application/json
+date: Tue, 15 Jan 2019 11:24:51 GMT
+content-length: 317
+connection: close
+
+{"request_id":"ef6440e5-02f9-0af4-e1a9-fe95a774eb2f","lease_id":"","renewable":false,"lease_duration":0,"data":{"address":"mfxnwR3AyZYj7aiuXbMwgM6xZBa1KextVL","publicKey":"02f72e24f1fd9f53023d606abb4fa5f784fda63e1618767d62bc4cf35c656af49c","uuid":"bgrjat5gouhsbrsopbs0"},"wrap_info":null,"warnings":null,"auth":null}

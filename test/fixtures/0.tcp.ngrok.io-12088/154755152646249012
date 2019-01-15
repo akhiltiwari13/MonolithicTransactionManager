@@ -1,0 +1,15 @@
+POST /v1/api/register
+x-vault-token: 5oPMP8ATL719MCtwZ1xN0r5s
+host: 0.tcp.ngrok.io:12088
+accept: application/json
+content-type: application/json
+body: {}
+
+HTTP/1.1 200 OK
+cache-control: no-store
+content-type: application/json
+date: Tue, 15 Jan 2019 11:25:26 GMT
+content-length: 189
+connection: close
+
+{"request_id":"8d3c6786-a975-c1a3-4d9e-2e42ee7f8280","lease_id":"","renewable":false,"lease_duration":0,"data":{"uuid":"bgus69lgouhsbrsopc30"},"wrap_info":null,"warnings":null,"auth":null}

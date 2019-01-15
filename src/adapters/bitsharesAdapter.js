@@ -20,11 +20,16 @@ class BitsharesAdapter {
   }
 
   getBalance = (headers, accountName) => // headers required for other adapters.
-    new Promise((resolve, reject) =>
-      this._getAccountId(`hwd${accountName}`)
+    new Promise(async (resolve, reject) => {
+      const isAccountExists = await this._getUuid(accountName);
+      if (!isAccountExists) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
+      return this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
         .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000).toString(), unit: "BTS" }))
-        .catch(reject))
+        .catch(reject)
+    });
 
   getTransactionHistory = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
@@ -129,7 +134,7 @@ class BitsharesAdapter {
     });
 
   transfer = req =>
-    new Promise((resolve, reject) => {
+    new Promise(async (resolve, reject) => {
       if (!req.body.fromAccount) {
         return reject(new BadRequestError('fromAccount is mandatory'));
       }
@@ -138,6 +143,14 @@ class BitsharesAdapter {
       }
       if (!req.body.sendAmount) {
         return reject(new BadRequestError('sendAmount is mandatory'));
+      }
+      const isSenderAccountExists = await this._getUuid(req.body.fromAccount);
+      if (!isSenderAccountExists) {
+        return reject(new BadRequestError('sender account does not exists'));
+      }
+      const isReceiverAccountExists = await this._getUuid(req.body.toAccount);
+      if (!isReceiverAccountExists) {
+        return reject(new BadRequestError('receiver account does not exists'));
       }
       let chainId;
       const fromAccount = req.body.fromAccount;

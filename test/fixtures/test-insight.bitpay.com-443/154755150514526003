@@ -1,0 +1,25 @@
+POST /api/tx/send
+content-type: application/json
+host: test-insight.bitpay.com
+accept: application/json
+body: {\"rawtx\":\"0100000001fd031630c335a67a20787021bd6b5815a68679810de34b42473ec47c3b692d29010000006b4830450221008ae3c1e47efcb54f020f7d380c444a12bb8ab4a446b045917d4a549df71c68f10220776dc047f846b21a6a92aa58ebe0f95527e22cd589283da9f869dfab60dfa5c2012102f72e24f1fd9f53023d606abb4fa5f784fda63e1618767d62bc4cf35c656af49cffffffff0210270000000000001976a914417b7dd94c6622452a16ebcff35d612d2e36560788ac50bfe400000000001976a91404e301511ce64912b1cfff156f8b1b8744d560bd88ac00000000\"}
+
+HTTP/1.1 200 OK
+date: Tue, 15 Jan 2019 11:25:05 GMT
+content-type: application/json; charset=utf-8
+content-length: 75
+connection: close
+set-cookie: __cfduid=de718e700ccc964ad22bbcf9575a3d1f11547551504; expires=Wed, 15-Jan-20 11:25:04 GMT; path=/; domain=.bitpay.com; HttpOnly
+x-powered-by: Express
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 59
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, PUT, POST, OPTIONS
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Content-Length, Cache-Control, cf-connecting-ip
+etag: W/"4b-cVNYHEXUM1OhOjXYNxSGrw"
+vary: Accept-Encoding
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 4997fac94dfc8866-BOM
+
+{"txid":"eabde297520e15c343a949ea92def8e049fc7d984c9b5fba3cfb8f94d41f5b67"}

@@ -1,0 +1,29 @@
+GET /api/rawtx/292d693b7cc43e47424be30d817986a615586bbd217078207aa635c3301603fd
+host: test-insight.bitpay.com
+accept: application/json
+content-type: application/json
+body: {}
+
+HTTP/1.1 200 OK
+date: Tue, 15 Jan 2019 11:24:58 GMT
+content-type: application/json; charset=utf-8
+content-length: 464
+connection: close
+set-cookie: __cfduid=d036ce88cdd3f3bd88dd674843c793e3a1547551497; expires=Wed, 15-Jan-20 11:24:57 GMT; path=/; domain=.bitpay.com; HttpOnly
+x-powered-by: Express
+x-ratelimit-limit: 60
+x-ratelimit-remaining: 56
+access-control-allow-origin: *
+access-control-allow-methods: GET, HEAD, PUT, POST, OPTIONS
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept, Content-Length, Cache-Control, cf-connecting-ip
+cache-control: public, max-age=86400
+x-content-type-options: nosniff
+etag: W/"1d0-jdNq5zhIkm2kSbkyCHCUlg"
+vary: Accept-Encoding
+cf-cache-status: MISS
+accept-ranges: bytes
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+server: cloudflare
+cf-ray: 4997fa9959358a8b-BOM
+
+{"rawtx":"0100000001faebdf578f466b605ae21d68b9b481ea41f5b25e85a8fe207792c2c05ea89d38010000006b483045022100eecd6dd92e324b925f52c63c93336739ce35cca213481e19fdb39b093e4378860220519c41038d74e66def93c346825e3393361b26e8c03220c89166d4713c36ee00012102f72e24f1fd9f53023d606abb4fa5f784fda63e1618767d62bc4cf35c656af49cffffffff0210270000000000001976a914417b7dd94c6622452a16ebcff35d612d2e36560788ac63e7e400000000001976a91404e301511ce64912b1cfff156f8b1b8744d560bd88ac00000000"}

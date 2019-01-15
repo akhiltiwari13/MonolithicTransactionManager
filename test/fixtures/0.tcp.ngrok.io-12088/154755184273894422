@@ -1,0 +1,15 @@
+POST /v1/api/signature
+x-vault-token: 5oPMP8ATL719MCtwZ1xN0r5s
+content-type: application/json
+host: 0.tcp.ngrok.io:12088
+accept: application/json
+body: {\"coinType\":240,\"path\":\"\",\"payload\":\"{\\\"transactionDigest\\\":\\\"c8dafba6388424ce05dd533c0bdd8768fb7dde4c7cf16769df382b55c334b99634e51c69d6c871c43d5c01050000000000000000001111000011687764756e69745f746573745f6e616d65010000000001022519f25d289bcdbc3c5e2da16d11ad7f3f823b81e5dbe1b1cd53f8da5ef0e9ea010000010000000001022519f25d289bcdbc3c5e2da16d11ad7f3f823b81e5dbe1b1cd53f8da5ef0e9ea010000022519f25d289bcdbc3c5e2da16d11ad7f3f823b81e5dbe1b1cd53f8da5ef0e9ea050000000000000000\\\"}\",\"uuid\":\"bgrj955gouhsbrsopbr0\"}
+
+HTTP/1.1 200 OK
+cache-control: no-store
+content-type: application/json
+date: Tue, 15 Jan 2019 11:30:42 GMT
+content-length: 304
+connection: close
+
+{"request_id":"49fb3787-9586-c0e6-d149-24db156d7734","lease_id":"","renewable":false,"lease_duration":0,"data":{"signature":"2056fa74b62b15458baae3ab15556284d3ed822027fd2a020cc43bc3b2ad8f161662dd58012d20e97993fd53c8ad5780b6bfb290b2331bfd9895b98309f723c543"},"wrap_info":null,"warnings":null,"auth":null}
