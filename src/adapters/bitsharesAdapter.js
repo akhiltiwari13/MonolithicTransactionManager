@@ -15,9 +15,14 @@ const priceBaseUrl = envConfig.get("priceBaseUrl");
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 
 class BitsharesAdapter {
+
   constructor(name) {
     this.name = name;
   }
+
+  getAddress = (headers, accountName) =>
+    new Promise((resolve, reject) =>
+      resolve({ 'BTS': `hwd${accountName}` }));
 
   getBalance = (headers, accountName) => // headers required for other adapters.
     new Promise(async (resolve, reject) => {

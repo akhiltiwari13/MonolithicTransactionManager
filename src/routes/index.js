@@ -21,7 +21,7 @@ const initRoutes = app => {
   // Account Routes
   app.get("/account/:accountName/balance", _checkAuthentication, _getBlockChain, AccountController.getBalance);
   app.get("/account/:accountName/txnHistory", _checkAuthentication, _getBlockChain, AccountController.getTxnHistory);
-  // app.get("/account/:accountName/address", _checkAuthentication, _getBlockChain, AccountController.address);
+  app.get("/account/:accountName/address", _checkAuthentication, _getBlockChain, AccountController.getAddress);
   app.post("/account", _checkAuthentication, AccountController.createAccount);
 
   // Account Routes (Common)

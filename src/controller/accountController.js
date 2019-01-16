@@ -14,6 +14,12 @@ export default class AccountController {
       .then(txnObject => Responder.success(res, txnObject))
       .catch(error => Responder.operationFailed(res, error));
 
+  static getAddress = (req, res) =>
+    req.adapter
+      .getAddress(req.headers, req.params.accountName)
+      .then(addressObject => Responder.success(res, addressObject))
+      .catch(error => Responder.operationFailed(res, error));
+
   static createAccount = (req, res) => {
     req.adapter = Adapters.getBlockchain('BTS');
     return req.adapter

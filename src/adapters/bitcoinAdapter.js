@@ -19,6 +19,12 @@ class BitcoinAdapater {
     this.address = address;
   }
 
+  getAddress = (headers, accountName) =>
+    new Promise((resolve, reject) =>
+      this._getPublicAddress(headers, accountName)
+        .then(result => resolve({ 'BTC': result.address }))
+        .catch(reject));
+
   getStatus = (blockchain, txnId) =>
     new Promise(async (resolve, reject) => {
       const connection = getConnection();

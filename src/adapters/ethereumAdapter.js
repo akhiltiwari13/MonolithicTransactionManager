@@ -25,9 +25,21 @@ if (typeof web3 !== 'undefined') {
 }
 
 class EthereumAdapter {
+
   constructor(name) {
     this.name = name;
   }
+
+  getAddress = (headers, accountName) =>
+    new Promise(async (resolve, reject) => {
+      const uuid = await this._getUuid(accountName);
+      if (!uuid) {
+        return reject(new BadRequestError('Account does not exists'));
+      }
+      return this._getAddress(headers, uuid)
+        .then(address => resolve({ 'ETH': address }))
+        .catch(reject)
+    });
 
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
