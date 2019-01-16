@@ -1,4 +1,4 @@
-import { AccountController, TransactionController, HealthController, CoinController } from "../controller";
+import { AccountController, TransactionController, HealthController, CoinController, CommonController } from "../controller";
 import * as Adapters from '../adapters';
 
 const _checkAuthentication = (req, res, next) => {
@@ -21,7 +21,11 @@ const initRoutes = app => {
   // Account Routes
   app.get("/account/:accountName/balance", _checkAuthentication, _getBlockChain, AccountController.getBalance);
   app.get("/account/:accountName/txnHistory", _checkAuthentication, _getBlockChain, AccountController.getTxnHistory);
+  // app.get("/account/:accountName/address", _checkAuthentication, _getBlockChain, AccountController.address);
   app.post("/account", _checkAuthentication, AccountController.createAccount);
+
+  // Account Routes (Common)
+  // app.get("/account/:accountName/address", _checkAuthentication, _getBlockChain, CommonController.allAddress);
 
   // Transfer/Transaction Routes
   app.get("/transaction/:txnId/status", _checkAuthentication, _getBlockChain, TransactionController.status);
