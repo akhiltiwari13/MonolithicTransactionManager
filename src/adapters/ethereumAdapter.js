@@ -124,6 +124,7 @@ class EthereumAdapter {
           transfer.amount = new BigNumber(req.body.sendAmount).multipliedBy(1000000000000000000).toNumber();
           transfer.coin_id = 'ETH';
           transfer.txn_status = 'PENDING';
+          transfer.txn_date = new Date();
           return connection.manager.save(transfer)
         })
         .then(txn => resolve({ TranscationId: txn.txn_id }))

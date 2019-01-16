@@ -15,8 +15,11 @@ export class Transfer {
   amount = "testAmount";
 
   @Column("varchar")
-  coin_id = "testAmount";
+  coin_id = "testCoin";
 
   @Column("varchar")
-  txn_status = "testAmount";
+  txn_status = "testStatus";
+
+  @Column("varchar")
+  txn_date = "testDate";
 }

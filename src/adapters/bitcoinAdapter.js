@@ -116,6 +116,7 @@ class BitcoinAdapater {
           transfer.amount = new BigNumber(sendAmount).multipliedBy(100000000).toNumber();
           transfer.coin_id = 'BTC';
           transfer.txn_status = 'PENDING';
+          transfer.txn_date = new Date();
           return connection.manager.save(transfer);
         })
         .then(txn => resolve({ TranscationId: txn.txn_id }))

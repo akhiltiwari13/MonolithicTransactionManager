@@ -1,7 +1,8 @@
 require("babel-register");
 require("babel-polyfill");
 
-import envConfig from "./config/envConfig";
+const EnvConfig = require("./config/envConfig");
+const envConfig = EnvConfig.default;
 
 module.exports = {
   type: "postgres",

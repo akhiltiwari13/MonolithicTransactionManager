@@ -219,6 +219,7 @@ class BitsharesAdapter {
           transfer.amount = amount;
           transfer.coin_id = 'BTS';
           transfer.txn_status = 'CONFIRMED';
+          transfer.txn_date = new Date();
           return connection.manager.save(transfer);
         })
         .then(txn => resolve({ TranscationId: txn.txn_id }))
