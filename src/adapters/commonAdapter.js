@@ -5,6 +5,10 @@ import BitcoinAdapter from "./bitcoinAdapter";
 import EthereumAdapter from "./ethereumAdapter";
 import BitsharesAdapter from "./bitsharesAdapter";
 import { BadRequestError } from '../errors';
+import envConfig from "../../config/envConfig";
+import { getRequest } from "../lib/request";
+
+const priceBaseUrl = envConfig.get("priceBaseUrl");
 
 class CommonAdapater {
 
@@ -59,6 +63,41 @@ class CommonAdapater {
         done();
       }, err => err ? reject(err) : resolve(addressObject))
     });
+
+  getPrice = (coin, query) =>
+    new Promise((resolve, reject) => {
+      let resultObj = {};
+      if (coin !== 'ALL') {
+        return reject(new BadRequestError('Coin and Blockchain mismatched'));
+      }
+      coin = 'BTC,ETH,UDOO,BTS'
+      const currency = query.currency || 'USD';
+      const url = `${priceBaseUrl}/data/pricemultifull?fsyms=${coin}&tsyms=${currency}`;
+      console.log(url)
+      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      return getRequest(url, {}, headers)
+        .then(result => {
+          if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
+            return reject(new BadRequestError('Invalid Currency'));
+          }
+          return resolve(this._prepareResult(result.DISPLAY, currency));
+        })
+        .catch(reject);
+    });
+
+  _prepareResult = (result, currency) => {
+    let resultObj = {};
+    const coins = ['BTC', 'ETH', 'UDOO', 'BTS'];
+    for (let coinIndex = 0; coinIndex < 4; coinIndex++) {
+      resultObj = Object.assign({
+        [coins[coinIndex]]: {
+          price: result[coins[coinIndex]][currency].PRICE,
+          '%change': result[coins[coinIndex]][currency].CHANGEPCT24HOUR
+        }
+      }, resultObj);
+    }
+    return resultObj;
+  }
 
   _getUuid = async (accountName) => {
     const connection = getConnection();
