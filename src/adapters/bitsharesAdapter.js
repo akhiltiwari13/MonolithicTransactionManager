@@ -292,7 +292,7 @@ class BitsharesAdapter {
       const txDigest = {
         transactionDigest: trHex
       };
-      const registrarUuid = registrarAccount === 'nathan' ? 'bgrj955gouhsbrsopbr0' : await this._getUuid(registrarAccount);
+      const registrarUuid = registrarAccount === 'nathan' ? 'bh0sv6dgouhsbmkm9g0g' : await this._getUuid(registrarAccount);
       const body = {
         coinType: 240,
         path: "",
