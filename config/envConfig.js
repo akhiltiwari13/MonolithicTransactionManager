@@ -105,7 +105,7 @@ const schema = {
   btsBaseUrl: {
     doc: "Contains baseUrl for BTS third party api",
     format: String,
-    default: "http://0.tcp.ngrok.io:19073",
+    default: "http://0.tcp.ngrok.io:13921",
     env: "BTS_BASE_URL",
     arg: "bts_base_url"
   },
@@ -133,7 +133,7 @@ const schema = {
   vaultBaseUrl: {
     doc: "Contains baseUrl of vault",
     format: String,
-    default: "http://0.tcp.ngrok.io:12088/v1",
+    default: "http://0.tcp.ngrok.io:16031/v1",
     env: "VAULT_BASE_URL",
     arg: "vault_base_url"
   },
