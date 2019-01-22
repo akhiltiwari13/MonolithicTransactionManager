@@ -222,7 +222,7 @@ class BitsharesAdapter {
           transfer.txn_date = new Date();
           return connection.manager.save(transfer);
         })
-        .then(txn => resolve({ TranscationId: txn.txn_id }))
+        .then(txn => resolve({ TransactionId: txn.txn_id }))
         .catch(err => reject(new BadRequestError('Error in Transaction')));
     });
 
