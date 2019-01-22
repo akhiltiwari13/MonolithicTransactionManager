@@ -42,7 +42,7 @@ class BitsharesAdapter {
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
-      return Apis.instance("ws://0.tcp.ngrok.io:19073", true) // TODO: Replace URL from a value from config file
+      return Apis.instance("ws://0.tcp.ngrok.io:13921/", true) // TODO: Replace URL from a value from config file
         .init_promise.then(() => ChainStore.init())
         .then(() => this._getAccountId(`hwd${accountName}`))
         .then(accountId => Promise.all([FetchChain("fetchFullAccount", accountId)]))
@@ -72,7 +72,7 @@ class BitsharesAdapter {
           let registrarAccount = "nathan";
           let accountName = req.body.name;
           publicKey = pubKey;
-          Apis.instance("ws://0.tcp.ngrok.io:19073/", true) // TODO: Replace URL
+          Apis.instance("ws://0.tcp.ngrok.io:13921/", true) // TODO: Replace URL
             .init_promise.then(res => {
               chainId = res[0].network.chain_id;
               return ChainStore.init();
@@ -166,7 +166,7 @@ class BitsharesAdapter {
         asset: "BTS"
       };
       let tr = new TransactionBuilder();
-      Apis.instance("ws://0.tcp.ngrok.io:19073/", true)
+      Apis.instance("ws://0.tcp.ngrok.io:13921/", true)
         .init_promise.then(res => {
           chainId = res[0].network.chain_id;
           return ChainStore.init();
@@ -292,7 +292,7 @@ class BitsharesAdapter {
       const txDigest = {
         transactionDigest: trHex
       };
-      const registrarUuid = registrarAccount === 'nathan' ? 'bh0sv6dgouhsbmkm9g0g' : await this._getUuid(registrarAccount);
+      const registrarUuid = registrarAccount === 'nathan' ? 'bh3efr5gouhsbnjgfgs0' : await this._getUuid(registrarAccount);
       const body = {
         coinType: 240,
         path: "",
