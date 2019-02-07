@@ -15,6 +15,9 @@ export class Transfer {
   amount = "testAmount";
 
   @Column("varchar")
+  value_USD = "testValue";
+
+  @Column("varchar")
   coin_id = "testCoin";
 
   @Column("varchar")
