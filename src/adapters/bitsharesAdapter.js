@@ -37,21 +37,33 @@ class BitsharesAdapter {
         .catch(reject)
     });
 
-  getTransactionHistory = (headers, accountName) =>
+  getTransactionHistory = (headers, accountName, offset, limit) =>
     new Promise(async (resolve, reject) => {
+      if(offset < 0 || limit < 0){
+        return reject(new BadRequestError('offset and limit must not be negative'));
+      }
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
-      return Apis.instance("ws://0.tcp.ngrok.io:14026/", true) // TODO: Replace URL from a value from config file
-        .init_promise.then(() => ChainStore.init())
-        .then(() => this._getAccountId(`hwd${accountName}`))
-        .then(accountId => Promise.all([FetchChain("fetchFullAccount", accountId)]))
-        .then(res => {
-          let [fullAccountHistory] = res;
-          resolve(fullAccountHistory.get("history"));
-        })
-        .catch(reject)
+      const connection = getConnection();
+      const TransferRepository = connection.getRepository(Transfer);
+      const transactions = await TransferRepository.find({
+        where: [
+          { from: accountName, coin_id: 'BTS' },
+          { to: accountName, coin_id: 'BTS' }
+        ],        
+        order: {
+          txn_date: 'DESC'
+        },
+        skip: offset,
+        take: limit
+      });
+      transactions.forEach(value => {
+        value.amount = new BigNumber(value.amount).div(100000);
+        value.coin_id = 'UDOO';
+      })
+      return resolve({transactions});
     });
 
   createAccount = req =>
