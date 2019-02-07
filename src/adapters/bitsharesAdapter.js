@@ -5,6 +5,7 @@ import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
 import { getConnection } from "typeorm";
 import { User } from "../entity/user";
+import EthereumAdapter from "./ethereumAdapter";
 import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors'
 import BigNumber from 'bignumber.js';;
@@ -157,7 +158,7 @@ class BitsharesAdapter {
       if (!isReceiverAccountExists) {
         return reject(new BadRequestError('receiver account does not exists'));
       }
-      let chainId;
+      let chainId, blockNo;
       const fromAccount = req.body.fromAccount;
       const toAccount = req.body.toAccount;
       const amount = new BigNumber(req.body.sendAmount).multipliedBy(100000).toNumber();
@@ -210,19 +211,23 @@ class BitsharesAdapter {
           tr.signatures.push(sign);
           return tr.broadcast();
         })
-        .then(res => {
+        .then(async(res) => {
+          blockNo = res[0].block_num;
           const connection = getConnection();
           const transfer = new Transfer();
+          const price = await new EthereumAdapter().getPrice('UDOO', 'USD');
+          const valueUSD = new BigNumber(req.body.sendAmount).multipliedBy(price.USD).toNumber();
           transfer.txn_id = res[0].id;
           transfer.from = fromAccount;
           transfer.to = toAccount;
           transfer.amount = amount;
+          transfer.value_USD = valueUSD;
           transfer.coin_id = 'BTS';
           transfer.txn_status = 'CONFIRMED';
           transfer.txn_date = new Date();
           return connection.manager.save(transfer);
         })
-        .then(txn => resolve({ TransactionId: txn.txn_id }))
+        .then(txn => resolve({ TransactionId: txn.txn_id, blockNumber: blockNo }))
         .catch(err => reject(new BadRequestError('Error in Transaction')));
     });
 
