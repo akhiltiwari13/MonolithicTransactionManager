@@ -12,6 +12,7 @@ const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const btcBaseUrl = btcEnvironment === 'development' ? envConfig.get('btcTestBaseUrl') : envConfig.get('btcMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
+const btcScanApiURL = btcEnvironment === 'development' ? envConfig.get('btcScanTestBaseUrl') : envConfig.get('btcScanMainBaseUrl');
 
 class BitcoinAdapater {
 
@@ -61,10 +62,8 @@ class BitcoinAdapater {
       return this._getPublicAddress(headers, accountName)
         .then(result => {
           const address = result.address;
-          const url = `${btcBaseUrl}/txs/?address=${address}`;
-          return getRequest(url)
-            .then(txnHistory => resolve({ address, txnHistory }))
-            .catch(reject)
+          const url = `${btcScanApiURL}/address/${address}`;
+          return resolve({ url });
         })
         .catch(reject)
     });
@@ -107,13 +106,16 @@ class BitcoinAdapater {
           return this._getSignature(res.payload, senderAccountName)
         })
         .then(signedTx => this._broadcastTx(signedTx))
-        .then(res => {
+        .then(async(res) => {
           const connection = getConnection();
           const transfer = new Transfer();
+          const price = await this.getPrice('BTC', 'USD');
+          const valueUSD = new BigNumber(req.body.sendAmount).multipliedBy(price.USD).toNumber();
           transfer.txn_id = res.txid;
           transfer.from = senderAccountName;
           transfer.to = receiverAccountName;
           transfer.amount = new BigNumber(sendAmount).multipliedBy(100000000).toNumber();
+          transfer.value_USD = valueUSD;
           transfer.coin_id = 'BTC';
           transfer.txn_status = 'PENDING';
           transfer.txn_date = new Date();
