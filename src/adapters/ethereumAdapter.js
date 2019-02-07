@@ -183,9 +183,7 @@ class EthereumAdapter {
       const url = `${vaultBaseUrl}/api/address`;
       const vaultHeaders = { "x-vault-token": headers["x-vault-token"] };
       return postRequest(url, body, vaultHeaders)
-        .then(res => {
-          return resolve(res.data.address);
-        })
+        .then(res => resolve(res.data.address))
         .catch(reject);
     });
 

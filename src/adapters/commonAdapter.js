@@ -23,17 +23,30 @@ class CommonAdapater {
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
-      return async.eachLimit(['BTC', 'BTS', 'ETH'], 3, async (coin, done) => {
+      const coinsPrice = await this.getPrice('ALL', 'USD');
+      return async.eachLimit(['BTC', 'UDOO', 'ETH'], 3, async (coin, done) => {
         if (coin === 'BTC') {
-          const btcBalance = await new BitcoinAdapter().getBalance(headers, accountName);
-          balanceObject = Object.assign({ [coin]: btcBalance }, balanceObject)
+          let btcBalance = await new BitcoinAdapter().getBalance(headers, accountName);
+          btcBalance = Object.assign({
+            price: coinsPrice.BTC.price,
+            '%change': coinsPrice.BTC['%change']
+          }, btcBalance);
+          balanceObject = Object.assign({ [coin]: btcBalance }, balanceObject);
         }
         if (coin === 'ETH') {
-          const ethBalance = await new EthereumAdapter().getBalance(headers, accountName);
+          let ethBalance = await new EthereumAdapter().getBalance(headers, accountName);
+          ethBalance = Object.assign({
+            price: coinsPrice.ETH.price,
+            '%change': coinsPrice.ETH['%change']
+          }, ethBalance);
           balanceObject = Object.assign({ [coin]: ethBalance }, balanceObject)
         }
-        if (coin === 'BTS') {
-          const btsBalance = await new BitsharesAdapter().getBalance(headers, accountName);
+        if (coin === 'UDOO') {
+          let btsBalance = await new BitsharesAdapter().getBalance(headers, accountName);
+          btsBalance = Object.assign({
+            price: coinsPrice.UDOO.price,
+            '%change': coinsPrice.UDOO['%change']
+          }, btsBalance);
           balanceObject = Object.assign({ [coin]: btsBalance }, balanceObject)
         }
         done();
@@ -70,10 +83,9 @@ class CommonAdapater {
       if (coin !== 'ALL') {
         return reject(new BadRequestError('Coin and Blockchain mismatched'));
       }
-      coin = 'BTC,ETH,UDOO,BTS'
+      coin = 'BTC,ETH,UDOO'
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/pricemultifull?fsyms=${coin}&tsyms=${currency}`;
-      console.log(url)
       const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
       return getRequest(url, {}, headers)
         .then(result => {
@@ -87,8 +99,8 @@ class CommonAdapater {
 
   _prepareResult = (result, currency) => {
     let resultObj = {};
-    const coins = ['BTC', 'ETH', 'UDOO', 'BTS'];
-    for (let coinIndex = 0; coinIndex < 4; coinIndex++) {
+    const coins = ['BTC', 'ETH', 'UDOO'];
+    for (let coinIndex = 0; coinIndex < 3; coinIndex++) {
       resultObj = Object.assign({
         [coins[coinIndex]]: {
           price: result[coins[coinIndex]][currency].PRICE,

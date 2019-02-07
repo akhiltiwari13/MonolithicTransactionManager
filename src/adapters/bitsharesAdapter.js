@@ -32,7 +32,7 @@ class BitsharesAdapter {
       }
       return this._getAccountId(`hwd${accountName}`)
         .then(accountId => this._getAccountBalance(accountId))
-        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000).toString(), unit: "BTS" }))
+        .then(balance => resolve({ accountName, balance: new BigNumber(balance).div(100000).toString(), unit: "UDOO" }))
         .catch(reject)
     });
 
