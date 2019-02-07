@@ -15,7 +15,6 @@ const etherscanApiURL = ethEnvironment === 'development' ? envConfig.get('ethsca
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = ethEnvironment === 'development' ? 3 : 1; // 1 for mainnet and 3 for testnet
-const etherscanApiKey = "HS7YPE9QMBP7CMPD2PK7I9RDN1NGZJAH5Y";
 const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
 
 if (typeof web3 !== 'undefined') {
@@ -115,13 +114,16 @@ class EthereumAdapter {
           const transactionHash = web3.eth.sendRawTransaction(signedTransaction.signature);
           return transactionHash;
         })
-        .then(res => {
+        .then(async(res) => {
           const connection = getConnection();
           const transfer = new Transfer();
+          const price = await this.getPrice('ETH', 'USD');
+          const valueUSD = new BigNumber(req.body.sendAmount).multipliedBy(price.USD).toNumber();
           transfer.txn_id = res;
           transfer.from = req.body.fromAccount;
           transfer.to = req.body.toAccount;
           transfer.amount = new BigNumber(req.body.sendAmount).multipliedBy(1000000000000000000).toNumber();
+          transfer.value_USD = valueUSD;
           transfer.coin_id = 'ETH';
           transfer.txn_status = 'PENDING';
           transfer.txn_date = new Date();
@@ -138,18 +140,7 @@ class EthereumAdapter {
         return reject(new BadRequestError('Account does not exists'));
       }
       return this._getAddress(headers, uuid)
-        .then(address => {
-          //  setting startBlockNumber and endBlockNumber 
-          var endBlockNumber = web3.eth.blockNumber;
-          var startBlockNumber = 0;
-          const url = `${etherscanApiURL}?module=account&action=txlist&address=${address}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&page=1&offset=10&sort=asc&apikey=${etherscanApiKey}`;
-          return request.get(url, (error, response, body) => { // using getRequest from lib gives "socket hang up" exception.
-            if (error) {
-              return reject(error);
-            }
-            return resolve(JSON.parse(body));
-          });
-        })
+        .then(address => resolve({ url: `${etherscanApiURL}/address/${address}` }))
         .catch(reject)
     })
 
