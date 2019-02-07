@@ -123,6 +123,22 @@ const schema = {
     env: "BTC_TEST_BASE_URL",
     arg: "btc_test_base_url"
   },
+
+  btcScanTestBaseUrl: {
+    doc: "Contains baseUrl for BTC testnet explorer third party api",
+    format: String,
+    default: "https://live.blockcypher.com/btc-testnet",
+    env: "BTC_SCAN_TEST_BASE_URL",
+    arg: "btc_scan_test_base_url"
+  },
+  btcScanMainBaseUrl: {
+    doc: "Contains baseUrl for BTC mainnet explorer third party api",
+    format: String,
+    default: "https://live.blockcypher.com/btc",
+    env: "BTC_SCAN_MAIN_BASE_URL",
+    arg: "btc_scan_main_base_url"
+  },
+
   priceBaseUrl: {
     doc: "Contains baseUrl to get price from third party api",
     format: String,
@@ -154,14 +170,14 @@ const schema = {
   ethscanTestBaseUrl: {
     doc: "Contains ropsten baseUrl for etherScan api, which is used in fetching transaction history",
     format: String,
-    default: "http://ropsten.etherscan.io/api",
+    default: "https://ropsten.etherscan.io",
     env: "ETHSCAN_TEST_BASE_URL",
     arg: "ethscan_test_base_url"
   },
   ethscanMainBaseUrl: {
     doc: "Contains mainnet baseUrl for etherScan api, which is used in fetching transaction history",
     format: String,
-    default: "http://api.etherscan.io/api",
+    default: "https://etherscan.io",
     env: "ETHSCAN_MAIN_BASE_URL",
     arg: "ethscan_main_base_url"
   },
