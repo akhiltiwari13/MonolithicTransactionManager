@@ -10,7 +10,7 @@ export default class AccountController {
 
   static getTxnHistory = (req, res) =>
     req.adapter
-      .getTransactionHistory(req.headers, req.params.accountName, req.query.offset, req.query.limit)
+      .getTransactionHistory(req.headers, req.params.accountName, req.query)
       .then(txnObject => Responder.success(res, txnObject))
       .catch(error => Responder.operationFailed(res, error));
 

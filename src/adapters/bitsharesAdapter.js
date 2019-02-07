@@ -37,8 +37,10 @@ class BitsharesAdapter {
         .catch(reject)
     });
 
-  getTransactionHistory = (headers, accountName, offset, limit) =>
+  getTransactionHistory = (headers, accountName, query) =>
     new Promise(async (resolve, reject) => {
+      const offset = query.offset || 0;
+      const limit = query.limit || 20;
       if(offset < 0 || limit < 0){
         return reject(new BadRequestError('offset and limit must not be negative'));
       }
