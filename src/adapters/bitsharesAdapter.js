@@ -3,12 +3,13 @@ import prepareBody from "../utils/requestBody";
 import envConfig from "../../config/envConfig";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
-import { getConnection } from "typeorm";
+import { getConnection, Like } from "typeorm";
 import { User } from "../entity/user";
 import EthereumAdapter from "./ethereumAdapter";
 import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors'
-import BigNumber from 'bignumber.js';;
+import BigNumber from 'bignumber.js';
+import moment from 'moment';
 import _ from 'lodash';
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
@@ -41,6 +42,11 @@ class BitsharesAdapter {
     new Promise(async (resolve, reject) => {
       const offset = query.offset || 0;
       const limit = query.limit || 20;
+      const order = query.order || 'DESC';
+      const days = query.days || 7;
+      let before = moment().format('YYYY-MM-DD');
+      let whereCondition = [];
+
       if(offset < 0 || limit < 0){
         return reject(new BadRequestError('offset and limit must not be negative'));
       }
@@ -48,15 +54,17 @@ class BitsharesAdapter {
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
+      for(let day = 1; day <= days; day++) {
+        whereCondition.push({ from: accountName, coin_id: 'BTS', txn_date: Like(`${before}%`) });
+        whereCondition.push({ to: accountName, coin_id: 'BTS',  txn_date: Like(`${before}%`) });
+        before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
+      }
       const connection = getConnection();
       const TransferRepository = connection.getRepository(Transfer);
       const transactions = await TransferRepository.find({
-        where: [
-          { from: accountName, coin_id: 'BTS' },
-          { to: accountName, coin_id: 'BTS' }
-        ],        
+        where: whereCondition,        
         order: {
-          txn_date: 'DESC'
+          txn_date: order
         },
         skip: offset,
         take: limit
@@ -64,7 +72,7 @@ class BitsharesAdapter {
       transactions.forEach(value => {
         value.amount = new BigNumber(value.amount).div(100000);
         value.coin_id = 'UDOO';
-      })
+      });
       return resolve({transactions});
     });
 
