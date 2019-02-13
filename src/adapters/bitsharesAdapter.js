@@ -87,7 +87,7 @@ class BitsharesAdapter {
           let registrarAccount = "nathan";
           let accountName = req.body.name;
           publicKey = pubKey;
-          Apis.instance("ws://0.tcp.ngrok.io:12225/", true) // TODO: Replace URL
+          Apis.instance("ws://0.tcp.ngrok.io:17018/", true) // TODO: Replace URL
             .init_promise.then(res => {
               chainId = res[0].network.chain_id;
               return ChainStore.init();
@@ -181,7 +181,7 @@ class BitsharesAdapter {
         asset: "BTS"
       };
       let tr = new TransactionBuilder();
-      Apis.instance("ws://0.tcp.ngrok.io:12225/", true)
+      Apis.instance("ws://0.tcp.ngrok.io:17018/", true)
         .init_promise.then(res => {
           chainId = res[0].network.chain_id;
           return ChainStore.init();
