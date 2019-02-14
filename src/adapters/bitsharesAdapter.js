@@ -3,7 +3,7 @@ import prepareBody from "../utils/requestBody";
 import envConfig from "../../config/envConfig";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
-import { getConnection, Like } from "typeorm";
+import { getConnection, Like, Brackets } from "typeorm";
 import { User } from "../entity/user";
 import EthereumAdapter from "./ethereumAdapter";
 import { Transfer } from "../entity/transfer";
@@ -47,6 +47,17 @@ class BitsharesAdapter {
       let before = moment().format('YYYY-MM-DD');
       let whereCondition = [];
 
+      if(!query.days) {
+        whereCondition.push({ from: accountName, coin_id: 'BTS' });
+        whereCondition.push({ to: accountName, coin_id: 'BTS' });
+      } else {
+        for(let day = 1; day <= days; day++) {
+          whereCondition.push({ from: accountName, coin_id: 'BTS', txn_date: Like(`${before}%`) });
+          whereCondition.push({ to: accountName, coin_id: 'BTS',  txn_date: Like(`${before}%`) });
+          before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
+        }
+      }
+
       if(offset < 0 || limit < 0){
         return reject(new BadRequestError('offset and limit must not be negative'));
       }
@@ -54,11 +65,7 @@ class BitsharesAdapter {
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
-      for(let day = 1; day <= days; day++) {
-        whereCondition.push({ from: accountName, coin_id: 'BTS', txn_date: Like(`${before}%`) });
-        whereCondition.push({ to: accountName, coin_id: 'BTS',  txn_date: Like(`${before}%`) });
-        before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
-      }
+      
       const connection = getConnection();
       const TransferRepository = connection.getRepository(Transfer);
       const transactions = await TransferRepository.find({
@@ -69,11 +76,15 @@ class BitsharesAdapter {
         skip: offset,
         take: limit
       });
+
       transactions.forEach(value => {
         value.amount = new BigNumber(value.amount).div(100000);
         value.coin_id = 'UDOO';
       });
-      return resolve({transactions});
+      
+      const transactionsCount = await TransferRepository.find({ where: whereCondition });
+
+      return resolve({ transactions, totalPages: Math.ceil(transactionsCount.length / limit) });
     });
 
   createAccount = req =>
