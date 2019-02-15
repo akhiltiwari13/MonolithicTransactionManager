@@ -152,7 +152,7 @@ class EthereumAdapter {
       if (!transaction) {
         return reject(new BadRequestError('Transaction does not exists'));
       }
-      return resolve(transaction.txn_status);
+      return resolve(transaction);
     })
 
   _registerUserToVault = req =>

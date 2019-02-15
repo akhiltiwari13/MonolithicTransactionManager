@@ -34,7 +34,7 @@ class BitcoinAdapater {
       if (!transaction) {
         return reject(new BadRequestError('Transaction does not exists'));
       }
-      return resolve(transaction.txn_status);
+      return resolve(transaction);
     })
 
   getBalance = (headers, accountName) =>
