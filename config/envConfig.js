@@ -138,7 +138,6 @@ const schema = {
     env: "BTC_SCAN_MAIN_BASE_URL",
     arg: "btc_scan_main_base_url"
   },
-
   priceBaseUrl: {
     doc: "Contains baseUrl to get price from third party api",
     format: String,
