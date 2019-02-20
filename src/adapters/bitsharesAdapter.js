@@ -65,11 +65,11 @@ class BitsharesAdapter {
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
       }
-      
+
       const connection = getConnection();
       const TransferRepository = connection.getRepository(Transfer);
       const transactions = await TransferRepository.find({
-        where: whereCondition,        
+        where: whereCondition,
         order: {
           txn_date: order
         },
@@ -81,7 +81,7 @@ class BitsharesAdapter {
         value.amount = new BigNumber(value.amount).div(100000);
         value.coin_id = 'UDOO';
       });
-      
+
       const transactionsCount = await TransferRepository.find({ where: whereCondition });
 
       return resolve({ transactions, totalPages: Math.ceil(transactionsCount.length / limit) });
@@ -106,7 +106,7 @@ class BitsharesAdapter {
           let registrarAccount = "nathan";
           let accountName = req.body.name;
           publicKey = pubKey;
-          Apis.instance("ws://0.tcp.ngrok.io:17996/", true) // TODO: Replace URL
+          Apis.instance("ws://0.tcp.ngrok.io:10879/", true) // TODO: Replace URL
             .init_promise.then(res => {
               chainId = res[0].network.chain_id;
               return ChainStore.init();
@@ -200,7 +200,7 @@ class BitsharesAdapter {
         asset: "BTS"
       };
       let tr = new TransactionBuilder();
-      Apis.instance("ws://0.tcp.ngrok.io:17996/", true)
+      Apis.instance("ws://0.tcp.ngrok.io:10879/", true)
         .init_promise.then(res => {
           chainId = res[0].network.chain_id;
           return ChainStore.init();
