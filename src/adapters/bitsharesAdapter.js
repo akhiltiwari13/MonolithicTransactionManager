@@ -14,7 +14,11 @@ import _ from 'lodash';
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
+const priceApiKey = envConfig.get("priceApiKey");
+const vaultToken = envConfig.get("vaultToken");
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
+const btsWebSocketUrl = envConfig.get('btsWSUrl');
+const nathanUuid = envConfig.get('nathanUuid');
 
 class BitsharesAdapter {
 
@@ -106,7 +110,7 @@ class BitsharesAdapter {
           let registrarAccount = "nathan";
           let accountName = req.body.name;
           publicKey = pubKey;
-          Apis.instance("ws://0.tcp.ngrok.io:10879/", true) // TODO: Replace URL
+          Apis.instance(btsWebSocketUrl, true) // TODO: Replace URL
             .init_promise.then(res => {
               chainId = res[0].network.chain_id;
               return ChainStore.init();
@@ -200,7 +204,7 @@ class BitsharesAdapter {
         asset: "BTS"
       };
       let tr = new TransactionBuilder();
-      Apis.instance("ws://0.tcp.ngrok.io:10879/", true)
+      Apis.instance(btsWebSocketUrl, true)
         .init_promise.then(res => {
           chainId = res[0].network.chain_id;
           return ChainStore.init();
@@ -271,7 +275,7 @@ class BitsharesAdapter {
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
-      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      const headers = { Apikey: priceApiKey };
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
@@ -296,7 +300,7 @@ class BitsharesAdapter {
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
-      const headers = { "x-vault-token": req.headers["x-vault-token"] };
+      const headers = { "x-vault-token": vaultToken };
       return postRequest(url, {}, headers)
         .then(resolve)
         .catch(reject);
@@ -310,7 +314,7 @@ class BitsharesAdapter {
         uuid
       };
       const url = `${vaultBaseUrl}/api/address`;
-      const headers = { "x-vault-token": req.headers["x-vault-token"] };
+      const headers = { "x-vault-token": vaultToken };
       return postRequest(url, body, headers)
         .then(res => resolve(res.data.publicKey))
         .catch(reject);
@@ -330,7 +334,7 @@ class BitsharesAdapter {
       const txDigest = {
         transactionDigest: trHex
       };
-      const registrarUuid = registrarAccount === 'nathan' ? 'bh3efr5gouhsbnjgfgs0' : await this._getUuid(registrarAccount);
+      const registrarUuid = registrarAccount === 'nathan' ? nathanUuid : await this._getUuid(registrarAccount);
       const body = {
         coinType: 240,
         path: "",
@@ -338,7 +342,7 @@ class BitsharesAdapter {
         uuid: registrarUuid
       };
       const headers = {
-        "x-vault-token": req.headers["x-vault-token"],
+        "x-vault-token": vaultToken,
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)

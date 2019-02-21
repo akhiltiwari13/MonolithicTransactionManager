@@ -26,14 +26,14 @@ const schema = {
     password: {
       doc: "Password for Database",
       format: String,
-      default: 'qwertyuiop',
+      default: "",
       env: "DB_PASSWORD",
       arg: "db_password"
     },
     database: {
       doc: "Name of Database",
       format: String,
-      default: 'testing',
+      default: 'howdoo-blockchain-services-db',
       env: "DB_DATABASE",
       arg: "db_database"
     }
@@ -63,14 +63,14 @@ const schema = {
     password: {
       doc: "Password for Database",
       format: String,
-      default: 'qwertyuiop',
+      default: "",
       env: "TEST_DB_PASSWORD",
       arg: "test_db_password"
     },
     database: {
       doc: "Name of Database",
       format: String,
-      default: 'testing_db',
+      default: 'testing-db',
       env: "TEST_DB_DATABASE",
       arg: "test_db_database"
     }
@@ -103,7 +103,7 @@ const schema = {
     arg: "port"
   },
   btsBaseUrl: {
-    doc: "Contains baseUrl for BTS third party api",
+    doc: "Contains baseUrl for BTS",
     format: String,
     default: "http://0.tcp.ngrok.io:10879",
     env: "BTS_BASE_URL",
@@ -180,6 +180,34 @@ const schema = {
     env: "ETHSCAN_MAIN_BASE_URL",
     arg: "ethscan_main_base_url"
   },
+  btsWSUrl: {
+    doc: "Web Socket URL to connect to BTS blockchain",
+    format: String,
+    default: "ws://0.tcp.ngrok.io:10879/",
+    env: "WS_BTS_URL",
+    arg: "ws_bts_url"
+  },
+  nathanUuid: {
+    doc: "Contains Nathan Uuid",
+    format: String,
+    default: "",
+    env: "NATHAN_UUID",
+    arg: "nathan_uuid"
+  },
+  vaultToken: {
+    doc: "Contains vault token",
+    format: String,
+    default: "",
+    env: "VAULT_TOKEN",
+    arg: "vault_token"
+  },
+  priceApiKey: {
+    doc: "Contains third party api key to get price",
+    format: String,
+    default: "",
+    env: "PRICE_API_KEY",
+    arg: "price_api_key"
+  }
 };
 
 const envConfig = convict(schema);

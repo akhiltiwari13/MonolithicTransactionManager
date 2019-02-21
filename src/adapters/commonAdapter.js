@@ -9,6 +9,7 @@ import envConfig from "../../config/envConfig";
 import { getRequest } from "../lib/request";
 
 const priceBaseUrl = envConfig.get("priceBaseUrl");
+const priceApiKey = envConfig.get("priceApiKey");
 
 class CommonAdapater {
 
@@ -86,7 +87,7 @@ class CommonAdapater {
       coin = 'BTC,ETH,UDOO'
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/pricemultifull?fsyms=${coin}&tsyms=${currency}`;
-      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      const headers = { Apikey: priceApiKey };
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {

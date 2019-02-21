@@ -10,6 +10,8 @@ import { BadRequestError } from '../errors';
 
 const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
+const priceApiKey = envConfig.get("priceApiKey");
+const vaultToken = envConfig.get("vaultToken");
 const btcBaseUrl = btcEnvironment === 'development' ? envConfig.get('btcTestBaseUrl') : envConfig.get('btcMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const btcScanApiURL = btcEnvironment === 'development' ? envConfig.get('btcScanTestBaseUrl') : envConfig.get('btcScanMainBaseUrl');
@@ -132,7 +134,7 @@ class BitcoinAdapater {
       }
       const currency = query.currency || 'USD';
       const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
-      const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' };
+      const headers = { Apikey: priceApiKey };
       return getRequest(url, {}, headers)
         .then(result => {
           if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
@@ -213,7 +215,7 @@ class BitcoinAdapater {
         uuid: senderUuid
       };
       const headers = {
-        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s",
+        "x-vault-token": vaultToken,
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)
@@ -262,7 +264,7 @@ class BitcoinAdapater {
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
-      const headers = { "x-vault-token": req.headers["x-vault-token"] };
+      const headers = { "x-vault-token": vaultToken };
       return postRequest(url, req.body, headers)
         .then(resolve)
         .catch(reject);
@@ -281,7 +283,7 @@ class BitcoinAdapater {
         uuid: senderUuid
       };
       const url = `${vaultBaseUrl}/api/address`;
-      headers = { "x-vault-token": headers["x-vault-token"] };
+      headers = { "x-vault-token": vaultToken };
       return postRequest(url, body, headers)
         .then(res => {
           if (_.includes(res.errors, 'missing client token')) {

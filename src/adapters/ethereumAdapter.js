@@ -13,6 +13,8 @@ import request from "request"; // for the socket hang up error
 const ethEnvironment = envConfig.get('env');
 const etherscanApiURL = ethEnvironment === 'development' ? envConfig.get('ethscanTestBaseUrl') : envConfig.get('ethscanMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
+const priceApiKey = envConfig.get("priceApiKey");
+const vaultToken = envConfig.get("vaultToken");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
 const ethChainId = ethEnvironment === 'development' ? 3 : 1; // 1 for mainnet and 3 for testnet
 const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
@@ -59,7 +61,7 @@ class EthereumAdapter {
       if (coin === 'ETH' || coin === 'UDOO') {
         const currency = query.currency || 'USD';
         const url = `${priceBaseUrl}/data/price?fsym=${coin}&tsyms=${currency}`;
-        const headers = { Apikey: 'f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7' }; //Apikey to be fetched from a config file
+        const headers = { Apikey: priceApiKey };
         return getRequest(url, {}, headers)
           .then(result => {
             if (result.Response === 'Error' && result.Message === `There is no data for any of the toSymbols ${currency} .`) {
@@ -158,7 +160,7 @@ class EthereumAdapter {
   _registerUserToVault = req =>
     new Promise((resolve, reject) => {
       const url = `${vaultBaseUrl}/api/register`;
-      const headers = { "x-vault-token": req.headers["x-vault-token"] };
+      const headers = { "x-vault-token": vaultToken };
       return postRequest(url, {}, headers)
         .then(resolve)
         .catch(reject);
@@ -172,7 +174,7 @@ class EthereumAdapter {
         uuid: uuid
       };
       const url = `${vaultBaseUrl}/api/address`;
-      const vaultHeaders = { "x-vault-token": headers["x-vault-token"] };
+      const vaultHeaders = { "x-vault-token": vaultToken };
       return postRequest(url, body, vaultHeaders)
         .then(res => resolve(res.data.address))
         .catch(reject);
@@ -212,8 +214,8 @@ class EthereumAdapter {
         "payload": JSON.stringify(payload),
         "uuid": fromAccountUUID
       }
-      const headers = {  // needs to be passed as parameters instead...
-        "x-vault-token": "5oPMP8ATL719MCtwZ1xN0r5s", // need to avoid hardcode
+      const headers = {
+        "x-vault-token": vaultToken,
         "Content-Type": "application/json"
       };
       return postRequest(url, body, headers)
