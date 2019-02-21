@@ -321,6 +321,9 @@ class BitsharesAdapter {
     });
 
   _getUuid = async (accountName) => {
+    if(accountName = 'nathan'){
+      return nathanUuid;
+    }
     const connection = getConnection();
     const UserRepository = connection.getRepository(User);
     const registrar = await UserRepository.findOne({ name: accountName });
