@@ -48,15 +48,35 @@ class BitsharesAdapter {
       const limit = query.limit || 20;
       const order = query.order || 'DESC';
       const days = query.days || 7;
+      const txnType = query.txnType || 'all';
       let before = moment().format('YYYY-MM-DD');
       let whereCondition = [];
 
-      if(!query.days) {
+      if(!query.days && txnType === 'all') {
         whereCondition.push({ from: accountName, coin_id: 'BTS' });
         whereCondition.push({ to: accountName, coin_id: 'BTS' });
-      } else {
+      }
+      if(query.days && txnType === 'all'){
         for(let day = 1; day <= days; day++) {
           whereCondition.push({ from: accountName, coin_id: 'BTS', txn_date: Like(`${before}%`) });
+          whereCondition.push({ to: accountName, coin_id: 'BTS',  txn_date: Like(`${before}%`) });
+          before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
+        }
+      }
+      if(!query.days && txnType === 'sent') {
+        whereCondition.push({ from: accountName, coin_id: 'BTS' });
+      }
+      if(query.days && txnType === 'sent'){
+        for(let day = 1; day <= days; day++) {
+          whereCondition.push({ from: accountName, coin_id: 'BTS', txn_date: Like(`${before}%`) });
+          before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
+        }
+      }
+      if(!query.days && txnType === 'received') {
+        whereCondition.push({ to: accountName, coin_id: 'BTS' });
+      }
+      if(query.days && txnType === 'received'){
+        for(let day = 1; day <= days; day++) {
           whereCondition.push({ to: accountName, coin_id: 'BTS',  txn_date: Like(`${before}%`) });
           before = moment(before, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD');
         }
