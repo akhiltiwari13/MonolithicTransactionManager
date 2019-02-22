@@ -19,7 +19,8 @@ class CommonAdapater {
 
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
-      let balanceObject = {}
+      let balanceObject = {};
+      let addresses;
       const isAccountExists = await this._getUuid(accountName);
       if (!isAccountExists) {
         return reject(new BadRequestError('Account does not exists'));
@@ -28,28 +29,35 @@ class CommonAdapater {
       return async.eachLimit(['BTC', 'UDOO', 'ETH'], 3, async (coin, done) => {
         if (coin === 'BTC') {
           let btcBalance = await new BitcoinAdapter().getBalance(headers, accountName);
+          let btcAddress = await new BitcoinAdapter().getAddress(headers, accountName);
           btcBalance = Object.assign({
             price: coinsPrice.BTC.price,
-            '%change': coinsPrice.BTC['%change']
+            '%change': coinsPrice.BTC['%change'],
+            address: btcAddress["BTC"]
           }, btcBalance);
           balanceObject = Object.assign({ [coin]: btcBalance }, balanceObject);
         }
         if (coin === 'ETH') {
           let ethBalance = await new EthereumAdapter().getBalance(headers, accountName);
+          let ethAddress = await new EthereumAdapter().getAddress(headers, accountName);
           ethBalance = Object.assign({
             price: coinsPrice.ETH.price,
-            '%change': coinsPrice.ETH['%change']
+            '%change': coinsPrice.ETH['%change'],
+            address: ethAddress["ETH"]
           }, ethBalance);
           balanceObject = Object.assign({ [coin]: ethBalance }, balanceObject)
         }
         if (coin === 'UDOO') {
           let btsBalance = await new BitsharesAdapter().getBalance(headers, accountName);
+          let btsAddress = await new BitsharesAdapter().getAddress(headers, accountName);
           btsBalance = Object.assign({
             price: coinsPrice.UDOO.price,
-            '%change': coinsPrice.UDOO['%change']
+            '%change': coinsPrice.UDOO['%change'],
+            address: btsAddress["BTS"]
           }, btsBalance);
           balanceObject = Object.assign({ [coin]: btsBalance }, balanceObject)
         }
+        addresses = await this.getAddress(headers, accountName);
         done();
       }, err => err ? reject(err) : resolve(balanceObject))
     });
