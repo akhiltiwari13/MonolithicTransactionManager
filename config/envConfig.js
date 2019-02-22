@@ -26,14 +26,14 @@ const schema = {
     password: {
       doc: "Password for Database",
       format: String,
-      default: "",
+      default: "qwertyuiop",
       env: "DB_PASSWORD",
       arg: "db_password"
     },
     database: {
       doc: "Name of Database",
       format: String,
-      default: 'howdoo-blockchain-services-db',
+      default: 'testing',
       env: "DB_DATABASE",
       arg: "db_database"
     }
@@ -190,21 +190,21 @@ const schema = {
   nathanUuid: {
     doc: "Contains Nathan Uuid",
     format: String,
-    default: "",
+    default: "bh3efr5gouhsbnjgfgs0",
     env: "NATHAN_UUID",
     arg: "nathan_uuid"
   },
   vaultToken: {
     doc: "Contains vault token",
     format: String,
-    default: "",
+    default: "5oPMP8ATL719MCtwZ1xN0r5s",
     env: "VAULT_TOKEN",
     arg: "vault_token"
   },
   priceApiKey: {
     doc: "Contains third party api key to get price",
     format: String,
-    default: "",
+    default: "f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7",
     env: "PRICE_API_KEY",
     arg: "price_api_key"
   }
