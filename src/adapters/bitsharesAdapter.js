@@ -184,6 +184,7 @@ class BitsharesAdapter {
               return tr.broadcast();
             })
             .then(res => {
+
               const connection = getConnection();
               const user = new User();
               user.name = accountName;
@@ -252,7 +253,6 @@ class BitsharesAdapter {
               asset_id: sendAsset.get("id")
             }
           });
-
           return tr.set_required_fees();
         })
         .then(() => tr.finalize())
@@ -341,7 +341,7 @@ class BitsharesAdapter {
     });
 
   _getUuid = async (accountName) => {
-    if(accountName = 'nathan'){
+    if(accountName === 'nathan'){
       return nathanUuid;
     }
     const connection = getConnection();
