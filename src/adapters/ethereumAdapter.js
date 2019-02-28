@@ -6,7 +6,7 @@ import { Transfer } from "../entity/transfer";
 import { BadRequestError } from '../errors';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3'; // to get web3 to work.
-import request from "request"; // for the socket hang up error
+import { validate } from 'wallet-address-validator';
 
 /* required constants for ethereum adapter */
 // this.web3 = new Web3(new Web3.providers.HttpProvider(ETHEREUM_NODE_URL))
@@ -16,6 +16,7 @@ const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const priceApiKey = envConfig.get("priceApiKey");
 const vaultToken = envConfig.get("vaultToken");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
+const addrEnv = ethEnvironment === 'development' ? 'testnet' : 'prod';
 const ethChainId = ethEnvironment === 'development' ? 3 : 1; // 1 for mainnet and 3 for testnet
 const ethereumNodeURL = ethEnvironment === 'development' ? envConfig.get('ethTestBaseUrl') : envConfig.get('ethMainBaseUrl');
 
@@ -78,6 +79,7 @@ class EthereumAdapter {
 
   transfer = req =>
     new Promise(async (resolve, reject) => {
+      let fromAccountAddress, toAccountAddress;
       if (!req.body.fromAccount) {
         return reject(new BadRequestError('fromAccount is mandatory'));
       }
@@ -95,8 +97,16 @@ class EthereumAdapter {
       if (!toAccountUUID) {
         return reject(new BadRequestError('receiver account does not exists'));
       }
-      const fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID);
-      const toAccountAddress = await this._getAddress(req.headers, toAccountUUID);
+      if (validate(req.body.fromAccount, 'ETH', addrEnv)) {
+        fromAccountAddress = req.body.fromAccount;
+      } else {
+        fromAccountAddress = await this._getAddress(req.headers, fromAccountUUID);
+      }
+      if (validate(req.body.toAccount, 'ETH', addrEnv)) {
+        toAccountAddress = req.body.fromAccount;
+      } else {
+        toAccountAddress = await this._getAddress(req.headers, toAccountUUID);
+      }
       const gasPrice = await this._getGasPrice();
       const gasLimit = await this._getGas("", fromAccountAddress, toAccountAddress);
       const amount = await this._getWeiFromEth(req.body.sendAmount);

@@ -7,6 +7,7 @@ import { Transfer } from "../entity/transfer";
 import { TransactionBuilder, networks } from 'bitcoinjs-lib';
 import _ from 'lodash';
 import { BadRequestError } from '../errors';
+import { validate } from 'wallet-address-validator';
 
 const btcEnvironment = envConfig.get('env');
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -15,6 +16,7 @@ const vaultToken = envConfig.get("vaultToken");
 const btcBaseUrl = btcEnvironment === 'development' ? envConfig.get('btcTestBaseUrl') : envConfig.get('btcMainBaseUrl');
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const btcScanApiURL = btcEnvironment === 'development' ? envConfig.get('btcScanTestBaseUrl') : envConfig.get('btcScanMainBaseUrl');
+const addrEnv = btcEnvironment === 'development' ? 'testnet' : 'prod';
 
 class BitcoinAdapater {
 
@@ -71,7 +73,7 @@ class BitcoinAdapater {
     });
 
   transfer = req =>
-    new Promise((resolve, reject) => {
+    new Promise(async(resolve, reject) => {
       if (!req.body.fromAccount) {
         return reject(new BadRequestError('fromAccount is mandatory'));
       }
@@ -81,20 +83,26 @@ class BitcoinAdapater {
       if (!req.body.sendAmount) {
         return reject(new BadRequestError('sendAmount is mandatory'));
       }
+
       let estimateFee, balance, senderAddress, receiverAddress;
       const senderAccountName = req.body.fromAccount;
       const receiverAccountName = req.body.toAccount;
       const sendAmount = req.body.sendAmount;
 
-      return this._getPublicAddress(req.headers, senderAccountName)
-        .then(result => {
-          senderAddress = result.address;
-          return this._getPublicAddress(req.headers, receiverAccountName)
-        })
-        .then(result => {
-          receiverAddress = result.address;
-          return this._estimateFee()
-        })
+      if (validate(req.body.fromAccount, 'BTC', addrEnv)) {
+        senderAddress = req.body.fromAccount;
+      } else {
+        let senderAddressResult = await this._getPublicAddress(req.headers, senderAccountName);
+        senderAddress = senderAddressResult.address;
+      }
+      if (validate(req.body.toAccount, 'BTC', addrEnv)) {
+        receiverAddress = req.body.fromAccount;
+      } else {
+        let receiverAddressResult = await this._getAddress(req.headers, receiverAccountName);
+        receiverAddress = receiverAddressResult.address;
+      }
+
+      return this._estimateFee()
         .then(feeInSatoshis => {
           estimateFee = feeInSatoshis;
           return this._getBalance(senderAddress);

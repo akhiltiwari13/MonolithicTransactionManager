@@ -45,6 +45,7 @@
     "replay": "^2.4.0",
     "request": "^2.88.0",
     "typeorm": "^0.2.9",
+    "wallet-address-validator": "^0.2.4",
     "web3": "^0.20.6",
     "winston": "^2.4.0"
   },
