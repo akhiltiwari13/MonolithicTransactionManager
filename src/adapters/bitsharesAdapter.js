@@ -3,7 +3,7 @@ import prepareBody from "../utils/requestBody";
 import envConfig from "../../config/envConfig";
 import { Apis } from "bitsharesjs-ws";
 import { ChainStore, FetchChain, TransactionBuilder } from "bitsharesjs";
-import { getConnection, Like, Brackets } from "typeorm";
+import { getConnection, Like } from "typeorm";
 import { User } from "../entity/user";
 import EthereumAdapter from "./ethereumAdapter";
 import { Transfer } from "../entity/transfer";
@@ -11,6 +11,7 @@ import { BadRequestError } from '../errors'
 import BigNumber from 'bignumber.js';
 import moment from 'moment';
 import _ from 'lodash';
+import CommonAdapater from "./commonAdapter";
 
 const BTSBaseUrl = envConfig.get("btsBaseUrl");
 const priceBaseUrl = envConfig.get("priceBaseUrl");
@@ -19,6 +20,7 @@ const vaultToken = envConfig.get("vaultToken");
 const vaultBaseUrl = envConfig.get("vaultBaseUrl");
 const btsWebSocketUrl = envConfig.get('btsWSUrl');
 const nathanUuid = envConfig.get('nathanUuid');
+const BtsServiceBaseUrl = envConfig.get('btsServiceBaseUrl');
 
 class BitsharesAdapter {
 
@@ -184,12 +186,21 @@ class BitsharesAdapter {
               return tr.broadcast();
             })
             .then(res => {
-
               const connection = getConnection();
               const user = new User();
               user.name = accountName;
               user.vault_uuid = userUuidVault;
               return connection.manager.save(user)
+            })
+            .then(async() => {
+              let addresses = await new CommonAdapater().getAddress(req.headers, req.body.name);
+              const connection = getConnection();
+              const UserRepository = connection.getRepository(User);
+              const user = await UserRepository.findOne({ vault_uuid: userUuidVault });
+              user.bts_address = addresses.BTS;
+              user.btc_address = addresses.BTC;
+              user.eth_address = addresses.ETH;
+              return connection.manager.save(user);
             })
             .then(user => resolve({ name: req.body.name, uuid: user.vault_uuid }))
             .catch(err => reject(new BadRequestError('Error in account creation')));
@@ -233,14 +244,13 @@ class BitsharesAdapter {
         .then(() =>
           Promise.all([
             FetchChain("getAccount", fromAccount === 'nathan' ? 'nathan' : `hwd${fromAccount}`),
-            FetchChain("getAccount", `hwd${toAccount}`),
+            FetchChain("getAccount", toAccount === 'nathan' ? 'nathan' : `hwd${toAccount}`),
             FetchChain("getAsset", sendAmount.asset),
             FetchChain("getAsset", sendAmount.asset)
           ])
         )
         .then(res => {
           let [fromAccount, toAccount, sendAsset, feeAsset] = res;
-
           tr.add_type_operation("transfer", {
             fee: {
               amount: 0,
@@ -283,6 +293,17 @@ class BitsharesAdapter {
           transfer.txn_status = 'CONFIRMED';
           transfer.txn_date = new Date();
           return connection.manager.save(transfer);
+        })
+        .then(async (txn) => {
+          if(toAccount === 'nathan'){
+            const address = await new EthereumAdapter().getAddress(req.headers, fromAccount);
+            const url = `${BtsServiceBaseUrl}/bts-report-tx`;
+            const body = { 'eth-wallet': address, amount };
+            // return postRequest(url, body)
+            //   .then(() => txn)
+            //   .catch(reject);
+          }
+          return txn;
         })
         .then(txn => resolve({ TransactionId: txn.txn_id, blockNumber: blockNo }))
         .catch(err => reject(new BadRequestError('Error in Transaction')));

@@ -17,6 +17,32 @@ class CommonAdapater {
     this.address = address;
   }
 
+  convertAddress = query =>
+    new Promise(async(resolve, reject) => {
+      let databaseQuery;
+
+      if(!query.coin) {
+        return reject(new BadRequestError('Coin is mandatory'));
+      }
+      if(query.coin === 'BTC'){
+        databaseQuery = { btc_address: query.address }
+      }
+      if(query.coin === 'BTS'){
+        databaseQuery = { bts_address: query.address }
+      }
+      if(query.coin === 'ETH'){
+        databaseQuery = { eth_address: query.address }
+      }
+
+      const connection = getConnection();
+      const UserRepository = connection.getRepository(User);
+      const user = await UserRepository.findOne(databaseQuery);
+      if(!user) {
+        return reject(new BadRequestError(`${query.coin} address doesn't exist in database.`));
+      }
+      return resolve(user);
+  })
+
   getBalance = (headers, accountName) =>
     new Promise(async (resolve, reject) => {
       let balanceObject = {};

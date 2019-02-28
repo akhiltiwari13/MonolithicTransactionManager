@@ -17,6 +17,7 @@ const initRoutes = app => {
 
   // Coin Routes
   app.get('/coin/:coinId/price', _checkAuthentication, _getBlockChain, CoinController.getPrice);
+  app.get('/coin/convertAddress', _checkAuthentication, _getBlockChain, CoinController.convertAddress);
 
   // Account Routes
   app.get("/account/:accountName/balance", _checkAuthentication, _getBlockChain, AccountController.getBalance);

@@ -207,6 +207,13 @@ const schema = {
     default: "f212d4142590ea9d2850d73ab9bb78b6f414da4613786c6a83b7e764e7bf67f7",
     env: "PRICE_API_KEY",
     arg: "price_api_key"
+  },
+  btsServiceBaseUrl: {
+    doc: "Contains bts service URL",
+    format: String,
+    default: "",
+    env: "BTS_SERVICE_URL",
+    arg: "bts_Service_url"
   }
 };
 

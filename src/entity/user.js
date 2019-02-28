@@ -7,4 +7,13 @@ export class User {
 
   @Column("varchar")
   vault_uuid = "testUuid";
+
+  @Column("varchar")
+  bts_address = "testBtsAddress";
+
+  @Column("varchar")
+  btc_address = "testBtcAddress";
+
+  @Column("varchar")
+  eth_address = "testEthAddress";
 }
