@@ -105,7 +105,7 @@ const schema = {
   btsBaseUrl: {
     doc: "Contains baseUrl for BTS",
     format: String,
-    default: "http://0.tcp.ngrok.io:12574",
+    default: "http://0.tcp.ngrok.io:11214",
     env: "BTS_BASE_URL",
     arg: "bts_base_url"
   },
@@ -148,7 +148,7 @@ const schema = {
   vaultBaseUrl: {
     doc: "Contains baseUrl of vault",
     format: String,
-    default: "http://0.tcp.ngrok.io:13901/v1",
+    default: "http://0.tcp.ngrok.io:16038/v1",
     env: "VAULT_BASE_URL",
     arg: "vault_base_url"
   },
@@ -183,7 +183,7 @@ const schema = {
   btsWSUrl: {
     doc: "Web Socket URL to connect to BTS blockchain",
     format: String,
-    default: "ws://0.tcp.ngrok.io:12574/",
+    default: "ws://0.tcp.ngrok.io:11214/",
     env: "WS_BTS_URL",
     arg: "ws_bts_url"
   },
@@ -208,12 +208,12 @@ const schema = {
     env: "PRICE_API_KEY",
     arg: "price_api_key"
   },
-  btsServiceBaseUrl: {
-    doc: "Contains bts service URL",
+  redisUrl: {
+    doc: "Contains URL to connect to redis",
     format: String,
     default: "",
-    env: "BTS_SERVICE_URL",
-    arg: "bts_Service_url"
+    env: "REDIS_URL",
+    arg: "redis_url"
   }
 };
 
