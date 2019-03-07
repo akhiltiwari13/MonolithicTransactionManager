@@ -98,7 +98,7 @@ class BitcoinAdapater {
       if (validate(req.body.toAccount, 'BTC', addrEnv)) {
         receiverAddress = req.body.fromAccount;
       } else {
-        let receiverAddressResult = await this._getAddress(req.headers, receiverAccountName);
+        let receiverAddressResult = await this._getPublicAddress(req.headers, receiverAccountName);
         receiverAddress = receiverAddressResult.address;
       }
 
